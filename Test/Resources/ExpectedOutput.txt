@@ -1,0 +1,64 @@
+﻿
+class <Module>
+    NotPublic
+
+public class UnitTestSampleAssembly.Class1<T1,T2,T3> : System.Object
+    AutoLayout, AnsiClass, Class, Public, Abstract
+    [DefaultMemberAttribute(Item)]
+    UnitTestSampleAssembly.Class1<T1,T2,T3>()
+    T1 PublicT1WriteableProperty { get; set; }
+    System.Int32 this.[System.Int32]
+    UnitTestSampleAssembly.Class1<T1,T2,T3> Self { get; }
+    System.EventHandler<System.EventArgs> PublicEvent { add; remove; }
+    static System.String StaticPublicStringMethod2(System.String arg1, System.Int32 arg2)
+    protected System.Void ProtectedVirtualVoidMethod0()
+    protected System.Void ProtectedAbstractVoidMethod0()
+
+public class UnitTestSampleAssembly.Class2<T1> : UnitTestSampleAssembly.Class1<T1,System.String,System.String>
+    AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    UnitTestSampleAssembly.IPublicInterface
+    UnitTestSampleAssembly.Class2<T1>()
+    System.Collections.Generic.List<System.String> PublicListOfStringProperty { get; }
+    System.String PublicInterfaceStringMethod()
+    System.String PublicStringAttributeMethod0()
+    UnitTestSampleAssembly.Class1<System.IO.Stream,T1,System.String> PartiallyClosedTypeMethod()
+    protected System.Void ProtectedVirtualVoidMethod0()
+    protected System.Void ProtectedAbstractVoidMethod0()
+
+class UnitTestSampleAssembly.Class3 : UnitTestSampleAssembly.Class2<System.IO.Stream>
+    AutoLayout, AnsiClass, Class, BeforeFieldInit
+    [ObsoleteAttribute(Test attribute)]
+    UnitTestSampleAssembly.Class3()
+
+public class UnitTestSampleAssembly.ExplicitInterfacesClass : System.Object
+    AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    UnitTestSampleAssembly.IPublicInterface
+    UnitTestSampleAssembly.IInternalInterface
+    UnitTestSampleAssembly.ExplicitInterfacesClass()
+
+public interface UnitTestSampleAssembly.IPublicInterface
+    AutoLayout, AnsiClass, Class, Public, ClassSemanticsMask, Abstract
+    System.String PublicInterfaceStringMethod()
+
+interface UnitTestSampleAssembly.IInternalInterface
+    AutoLayout, AnsiClass, Class, ClassSemanticsMask, Abstract
+    System.String InternalInterfaceStringMethod()
+
+struct UnitTestSampleAssembly.Struct1 : System.ValueType
+    AutoLayout, AnsiClass, Class, SequentialLayout, Sealed, BeforeFieldInit
+    System.Int32 PublicIntMethod0()
+
+public enum UnitTestSampleAssembly.ByteEnum : System.Enum
+    AutoLayout, AnsiClass, Class, Public, Sealed
+
+public enum UnitTestSampleAssembly.DefaultEnum : System.Enum
+    AutoLayout, AnsiClass, Class, Public, Sealed
+
+public enum UnitTestSampleAssembly.FlagsEnum : System.Enum
+    AutoLayout, AnsiClass, Class, Public, Sealed
+    [FlagsAttribute]
+
+public class UnitTestSampleAssembly.TestAttribute : System.Attribute
+    AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    [AttributeUsageAttribute(32767)]
+    UnitTestSampleAssembly.TestAttribute()
