@@ -36,11 +36,7 @@ namespace MRUnitTests
             var builder = new StringBuilder();
             WriteTypes(testAssembly, builder);
 
-            // Normalize line endings rather than changing the git settings
-            var result = builder.ToString().Replace("\r", "");
-            var expectedResult = Properties.Resources.ExpectedOutput.Replace("\r", "");            
-
-            Assert.IsTrue(result == expectedResult);
+            Assert.AreEqual(builder.ToString(), Properties.Resources.ExpectedOutput);
 
         }
 
@@ -157,7 +153,21 @@ namespace MRUnitTests
                     result.AppendLine(")");
                 }
 
-
+                foreach(var field in mrType.GetFields())
+                {
+                    if(mrType.IsEnum)
+                    {
+                        if (!field.IsSpecialName) // Ignore special value__ field
+                        {
+                            var value = field.GetConstantValue(out var constantTypeCode);
+                            result.AppendLine($"    {field.GetName()} = {value},");
+                        }
+                    }
+                    else
+                    {
+                        result.AppendLine($"    {field.GetFieldType().GetPrettyFullName()} {field.GetName()};");
+                    }
+                }
             }
         }
 

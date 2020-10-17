@@ -13,6 +13,7 @@ public class UnitTestSampleAssembly.Class1<T1,T2,T3> : System.Object
     static System.String StaticPublicStringMethod2(System.String arg1, System.Int32 arg2)
     protected System.Void ProtectedVirtualVoidMethod0()
     protected System.Void ProtectedAbstractVoidMethod0()
+    System.Int32 PublicIntField;
 
 public class UnitTestSampleAssembly.Class2<T1> : UnitTestSampleAssembly.Class1<T1,System.String,System.String>
     AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
@@ -47,16 +48,24 @@ interface UnitTestSampleAssembly.IInternalInterface
 struct UnitTestSampleAssembly.Struct1 : System.ValueType
     AutoLayout, AnsiClass, Class, SequentialLayout, Sealed, BeforeFieldInit
     System.Int32 PublicIntMethod0()
+    System.Int32 PublicIntField;
+    System.Double PublicDoubleField;
 
 public enum UnitTestSampleAssembly.ByteEnum : System.Enum
     AutoLayout, AnsiClass, Class, Public, Sealed
+    Field1 = 0,
+    Field2 = 1,
 
 public enum UnitTestSampleAssembly.DefaultEnum : System.Enum
     AutoLayout, AnsiClass, Class, Public, Sealed
+    Field1 = 0,
+    Field2 = 1,
 
 public enum UnitTestSampleAssembly.FlagsEnum : System.Enum
     AutoLayout, AnsiClass, Class, Public, Sealed
     [FlagsAttribute]
+    Field1 = 0,
+    Field2 = 1,
 
 public class UnitTestSampleAssembly.TestAttribute : System.Attribute
     AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
