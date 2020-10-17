@@ -33,9 +33,14 @@ namespace MRUnitTests
             Assert.IsTrue(loadContext.LoadedAssemblies.Count() == 1);
             var testAssembly = loadContext.LoadedAssemblies.First();
 
-            var result = new StringBuilder();
-            WriteTypes(testAssembly, result);
-            Assert.IsTrue(result.ToString() == Properties.Resources.ExpectedOutput);
+            var builder = new StringBuilder();
+            WriteTypes(testAssembly, builder);
+
+            // Normalize line endings rather than changing the git settings
+            var result = builder.ToString().Replace("\r", "");
+            var expectedResult = Properties.Resources.ExpectedOutput.Replace("\r", "");            
+
+            Assert.IsTrue(result == expectedResult);
 
         }
 
