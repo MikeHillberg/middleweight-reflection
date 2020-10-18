@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("MiddleweightReflection")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription(".Net library to read .Net Assembly and Windows WinMD metadata files, based on System.Reflection.Metadata")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Mike Hillberg")]
 [assembly: AssemblyProduct("MiddleweightReflection")]
-[assembly: AssemblyCopyright("Copyright ©  2019")]
+[assembly: AssemblyCopyright("Copyright ©  2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
