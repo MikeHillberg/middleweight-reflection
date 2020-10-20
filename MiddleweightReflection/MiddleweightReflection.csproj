@@ -1,9 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <Deterministic>false</Deterministic>
+    <Version>1.0.0</Version>
+    <Description>.Net library to read .Net Assembly and Windows WinMD metadata files, based on System.Reflection.Metadata</Description>
     <TargetFramework>netstandard2.0</TargetFramework>
     <OutputType>Library</OutputType>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <!--<GenerateAssemblyInfo>false</GenerateAssemblyInfo>-->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PackageId>MikeHillberg.MiddleweightReflection</PackageId>
+    <Authors>Mike Hillberg</Authors>
+    <RepositoryUrl>https://github.com/MikeHillberg/middleweight-reflection</RepositoryUrl>
+    <PackageTags>Reflection System.Reflection.Metadata WinMD</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
@@ -14,5 +23,8 @@
     <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
     <PackageReference Include="System.Reflection.Metadata" Version="1.8.1" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.7.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
 </Project>

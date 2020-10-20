@@ -6,6 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
+
+#pragma warning disable CS0067,CS0649,CS0414
+
 namespace UnitTestSampleAssembly
 {
     abstract public class Class1<T1, T2, T3>
