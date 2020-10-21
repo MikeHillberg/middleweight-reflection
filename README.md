@@ -13,6 +13,8 @@ with fake types.
 
 There's a basic example in the [unit test](https://github.com/MikeHillberg/middleweight-reflection/blob/main/Test/UnitTest1.cs).
 
+NuGet: https://www.nuget.org/packages/mikehillberg.middleweightreflection
+
 ## Issues
 
 There are some more advanced metadata features not covered yet, but the most notable are:
