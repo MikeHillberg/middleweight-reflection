@@ -17,28 +17,57 @@ namespace MRUnitTests
             //_testAssembly = Properties.Resources.TestAssembly;
         }
 
-        Assembly _testAssembly;
-
+        // Load a .Net (not WinRT) assembly using it's name
         [TestMethod]
-        public void TestMethod1()
+        public void TestDotNetAssembly()
         {
+            var testAssembly = typeof(UnitTestSampleAssembly.Class1<,,>).Assembly;
+
             var loadContext = new MrLoadContext();
-            loadContext.AssemblyPathFromName = AssemblyPathFromName;
+            loadContext.AssemblyPathFromName = (string assemblyName) =>
+            {
+                if (testAssembly.GetName().Name == assemblyName)
+                {
+                    return testAssembly.Location;
+                }
 
-            _testAssembly = typeof(UnitTestSampleAssembly.Class1<,,>).Assembly;
+                return null;
+            };
 
-            loadContext.LoadFromAssemblyName(_testAssembly.GetName().Name);
+            loadContext.LoadFromAssemblyName(testAssembly.GetName().Name);
             loadContext.FinishLoading();
 
+            TestMethodHelper(loadContext, Properties.Resources.ExpectedOutput);
+        }
+
+        // Load a WinMD from memory
+        [TestMethod]
+        public void TestWinMD()
+        {
+            var loadContext = new MrLoadContext(useWinRTProjections: true);
+            loadContext.LoadAssemblyFromBytes(Properties.Resources.UnitTestWinRTComponent);
+            loadContext.FinishLoading();
+
+            TestMethodHelper(loadContext, Properties.Resources.ExpectdProjectedWinRT);
+
+            loadContext = new MrLoadContext(useWinRTProjections: false);
+            loadContext.LoadAssemblyFromBytes(Properties.Resources.UnitTestWinRTComponent);
+            loadContext.FinishLoading();
+
+            TestMethodHelper(loadContext, Properties.Resources.ExpectedUnprojectedWinRT);
+        }
+
+        public void TestMethodHelper(MrLoadContext loadContext, string expectedOutput)
+        {
             Assert.IsTrue(loadContext.LoadedAssemblies.Count() == 1);
             var testAssembly = loadContext.LoadedAssemblies.First();
 
             var builder = new StringBuilder();
             WriteTypes(testAssembly, builder);
 
-            Assert.AreEqual(builder.ToString(), Properties.Resources.ExpectedOutput);
-
+            Assert.AreEqual(builder.ToString(), expectedOutput);
         }
+
 
         private static void WriteTypes(MrAssembly testAssembly, StringBuilder result)
         {
@@ -119,7 +148,7 @@ namespace MRUnitTests
                     MrType itemPropertyType = null;
                     if (propertyName == "Item")
                     {
-                        itemPropertyType = property.GetItemType(publicishOnly:true);
+                        itemPropertyType = property.GetItemType(publicishOnly: true);
                     }
 
                     if (itemPropertyType == null)
@@ -153,9 +182,9 @@ namespace MRUnitTests
                     result.AppendLine(")");
                 }
 
-                foreach(var field in mrType.GetFields())
+                foreach (var field in mrType.GetFields())
                 {
-                    if(mrType.IsEnum)
+                    if (mrType.IsEnum)
                     {
                         if (!field.IsSpecialName) // Ignore special value__ field
                         {
@@ -203,14 +232,5 @@ namespace MRUnitTests
             }
         }
 
-        private string AssemblyPathFromName(string assemblyName)
-        {
-            if(_testAssembly.GetName().Name == assemblyName)
-            {
-                return _testAssembly.Location;
-            }
-
-            return null;
-        }
     }
 }

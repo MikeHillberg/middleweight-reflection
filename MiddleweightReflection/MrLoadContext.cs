@@ -28,6 +28,21 @@ namespace MiddleweightReflection
         }
 
         /// <summary>
+        /// A MRLoadContext into which can be loaded assemblies. If useWinRTProjections is set,
+        /// some types in a WinMD will be converted, for example IVector to IList.
+        /// </summary>
+        /// <param name="useWinRTProjections"></param>
+        public MrLoadContext(bool useWinRTProjections)
+        {
+            if(useWinRTProjections)
+            {
+                MetadataReaderOptions = MetadataReaderOptions.ApplyWindowsRuntimeProjections;
+            }
+
+            LoadFromAssemblyName("mscorlib", implicitLoad: true);
+        }
+
+        /// <summary>
         /// Call this after loading assemblies, after which the LoadedAssemblies property will become non-null
         /// </summary>
         public void FinishLoading()
@@ -46,21 +61,6 @@ namespace MiddleweightReflection
                 assembly.Initialize();
             }
 
-        }
-
-        /// <summary>
-        /// A MRLoadContext into which can be loaded assemblies. If useWinRTProjections is set,
-        /// some types in a WinMD will be converted, for example IVector to IList.
-        /// </summary>
-        /// <param name="useWinRTProjections"></param>
-        public MrLoadContext(bool useWinRTProjections = true)
-        {
-            if(!useWinRTProjections)
-            {
-                MetadataReaderOptions = MetadataReaderOptions.None;
-            }
-
-            LoadFromAssemblyName("mscorlib", implicitLoad: true);
         }
 
         public delegate string AssemblyPathFromNameCallback(string assemblyName);
@@ -186,6 +186,24 @@ namespace MiddleweightReflection
             }
 
             return LoadFromReader(reader, name, path, implicitLoad: false);
+        }
+
+        /// <summary>
+        /// Load an assembly from memory. If already loaded, return that.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public MrAssembly LoadAssemblyFromBytes(byte[] buffer)
+        {
+            var reader = CreateReaderFromBytes(buffer);
+            var name = reader.GetString(reader.GetAssemblyDefinition().Name);
+
+            if (_loadedAssemblies.TryGetValue(name, out var assembly))
+            {
+                return assembly;
+            }
+
+            return LoadFromReader(reader, name, null, implicitLoad: false);
         }
 
         /// <summary>
@@ -326,13 +344,23 @@ namespace MiddleweightReflection
         }
 
         /// <summary>
-        /// Create the System.Reflection.Metadata MetadataReader
+        /// Create the System.Reflection.Metadata MetadataReader give the path to an assembly
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
         unsafe MetadataReader CreateReaderFromPath(string path)
         {
             var buffer = File.ReadAllBytes(path);
+            return CreateReaderFromBytes(buffer);
+        }
+
+        /// <summary>
+        /// Create the System.Reflection.Metadata MetadataReader given an in-memory assembly
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        unsafe MetadataReader CreateReaderFromBytes(byte[] buffer)
+        {
             var pinnedHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
             var headers = new PEHeaders(new MemoryStream(buffer));
             var startOffset = headers.MetadataStartOffset;

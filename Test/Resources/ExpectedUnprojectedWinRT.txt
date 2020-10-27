@@ -1,0 +1,33 @@
+﻿
+class <Module>
+    NotPublic
+
+class UnitTestWinRTComponent.<CLR>WinRTComponent : System.Object
+    AutoLayout, AnsiClass, Class, Sealed, SpecialName, BeforeFieldInit
+    [MarshalingBehaviorAttribute]
+    [ThreadingAttribute]
+    [VersionAttribute(16777216)]
+    [ActivatableAttribute(16777216)]
+    UnitTestWinRTComponent.IWinRTComponentClass
+    UnitTestWinRTComponent.<CLR>WinRTComponent()
+    System.Collections.Generic.IList<System.String> StringList { get; set; }
+
+public class UnitTestWinRTComponent.WinRTComponent : System.Object
+    AutoLayout, AnsiClass, Class, Public, Sealed, WindowsRuntime, BeforeFieldInit
+    [MarshalingBehaviorAttribute]
+    [ThreadingAttribute]
+    [VersionAttribute(16777216)]
+    [CompilerGeneratedAttribute]
+    [ActivatableAttribute(16777216)]
+    UnitTestWinRTComponent.IWinRTComponentClass
+    Windows.Foundation.IStringable
+    UnitTestWinRTComponent.WinRTComponent()
+    Windows.Foundation.Collections.IVector<System.String> StringList { get; set; }
+
+interface UnitTestWinRTComponent.IWinRTComponentClass
+    AutoLayout, AnsiClass, Class, ClassSemanticsMask, Abstract, WindowsRuntime
+    [CompilerGeneratedAttribute]
+    [GuidAttribute(595258099, 43547, 21940, 123, 11, 53, 220, 245, 117, 190, 210)]
+    [VersionAttribute(16777216)]
+    [ExclusiveToAttribute(UnitTestWinRTComponent.WinRTComponent)]
+    Windows.Foundation.Collections.IVector<System.String> StringList { get; set; }
