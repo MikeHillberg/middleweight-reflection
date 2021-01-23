@@ -337,7 +337,7 @@ namespace MiddleweightReflection
             var name = reader.GetString(reader.GetAssemblyDefinition().Name);
             if (name != requestedName)
             {
-                throw new Exception($"Expected assembly name '{requestedName}', actual is '{name}'");
+                //throw new Exception($"Expected assembly name '{requestedName}', actual is '{name}'");
             }
 
             return;

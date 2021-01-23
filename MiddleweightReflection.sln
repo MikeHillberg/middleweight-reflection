@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestSampleAssembly", "T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestWinRTComponent", "Test\UnitTestWinRTComponent\UnitTestWinRTComponent.csproj", "{95C612FE-E84C-4923-9AB3-CD305B4F5C84}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MRDump", "MRDump\MRDump.csproj", "{C6031909-48BC-4D97-8641-151185F9C62B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -105,6 +107,26 @@ Global
 		{95C612FE-E84C-4923-9AB3-CD305B4F5C84}.Release|x64.Build.0 = Release|x64
 		{95C612FE-E84C-4923-9AB3-CD305B4F5C84}.Release|x86.ActiveCfg = Release|x86
 		{95C612FE-E84C-4923-9AB3-CD305B4F5C84}.Release|x86.Build.0 = Release|x86
+		{C6031909-48BC-4D97-8641-151185F9C62B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6031909-48BC-4D97-8641-151185F9C62B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6031909-48BC-4D97-8641-151185F9C62B}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{C6031909-48BC-4D97-8641-151185F9C62B}.Debug|ARM.Build.0 = Debug|Any CPU
+		{C6031909-48BC-4D97-8641-151185F9C62B}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{C6031909-48BC-4D97-8641-151185F9C62B}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{C6031909-48BC-4D97-8641-151185F9C62B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C6031909-48BC-4D97-8641-151185F9C62B}.Debug|x64.Build.0 = Debug|Any CPU
+		{C6031909-48BC-4D97-8641-151185F9C62B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C6031909-48BC-4D97-8641-151185F9C62B}.Debug|x86.Build.0 = Debug|Any CPU
+		{C6031909-48BC-4D97-8641-151185F9C62B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6031909-48BC-4D97-8641-151185F9C62B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6031909-48BC-4D97-8641-151185F9C62B}.Release|ARM.ActiveCfg = Release|Any CPU
+		{C6031909-48BC-4D97-8641-151185F9C62B}.Release|ARM.Build.0 = Release|Any CPU
+		{C6031909-48BC-4D97-8641-151185F9C62B}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{C6031909-48BC-4D97-8641-151185F9C62B}.Release|ARM64.Build.0 = Release|Any CPU
+		{C6031909-48BC-4D97-8641-151185F9C62B}.Release|x64.ActiveCfg = Release|Any CPU
+		{C6031909-48BC-4D97-8641-151185F9C62B}.Release|x64.Build.0 = Release|Any CPU
+		{C6031909-48BC-4D97-8641-151185F9C62B}.Release|x86.ActiveCfg = Release|Any CPU
+		{C6031909-48BC-4D97-8641-151185F9C62B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

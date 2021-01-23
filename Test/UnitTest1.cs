@@ -69,7 +69,7 @@ namespace MRUnitTests
         }
 
 
-        private static void WriteTypes(MrAssembly testAssembly, StringBuilder result)
+        public static void WriteTypes(MrAssembly testAssembly, StringBuilder result)
         {
             foreach (var mrType in testAssembly.GetAllTypes())
             {

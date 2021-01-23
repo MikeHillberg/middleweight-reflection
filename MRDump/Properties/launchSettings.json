@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MRDump": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\Users\\mikeh\\Downloads\\Microsoft.ReactNative.winmd"
+    }
+  }
+}
