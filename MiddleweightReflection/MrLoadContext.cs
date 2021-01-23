@@ -132,16 +132,16 @@ namespace MiddleweightReflection
             mrType = null;
 
             // Convert e.g. Byte[] into Byte
-            fullTypeName = MrType.GetUnmodifiedTypeName(fullTypeName, out var isArray, out var isReference, out var isPointer);
+            fullTypeName = MrType.GetUnmodifiedTypeName(fullTypeName, out var arrayRank, out var isReference, out var isPointer);
 
             foreach (var assembly in _loadedAssemblies.Values.Union(_implicitAssemblies.Values))
             {
                 if (assembly.TryGetType(fullTypeName, out mrType))
                 {
                     // Convert back if necessary, e.g. Byte into Byte[]
-                    if (isArray || isReference || isPointer)
+                    if (arrayRank != null || isReference || isPointer)
                     {
-                        mrType = MrType.Clone(mrType, isArray, isReference, isPointer);
+                        mrType = MrType.Clone(mrType, arrayRank, isReference, isPointer);
                     }
 
                     return true;

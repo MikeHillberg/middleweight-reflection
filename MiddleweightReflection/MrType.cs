@@ -29,7 +29,9 @@ namespace MiddleweightReflection
         public bool IsTypeCode { get; private set; }
         public PrimitiveTypeCode TypeCode { get; }
 
-        public bool IsArray { get; private set; }
+        public bool IsArray => ArrayRank != 0;
+
+        public int ArrayRank { get; private set; } = 0; 
 
         public bool IsPointer { get; private set; }
         public bool IsReference { get; private set; }
@@ -66,13 +68,13 @@ namespace MiddleweightReflection
         internal static MrType CreateFromGenericParameterHandle(
             GenericParameterHandle handle,
             MrAssembly assembly,
-            bool isArray = false,
+            int arrayRank = 0,
             bool isReference = false,
             bool isPointer = false)
         {
             return new MrType(handle, assembly)
             {
-                IsArray = isArray,
+                ArrayRank = arrayRank,
                 IsReference = isReference,
                 IsPointer = isPointer
             };
@@ -81,17 +83,17 @@ namespace MiddleweightReflection
         // Create a new type from an old type, but modified to be an array/reference/pointer/const
         internal static MrType Clone(
             MrType other,
-            bool? isArrayOverride = null,
+            int? arrayRankOverride = null,
             bool? isReferenceOverride = null,
             bool? isPointerOverride = null,
             bool? isConstOverride = null)
         {
-            return new MrType(other, isArrayOverride, isReferenceOverride, isPointerOverride, isConstOverride);
+            return new MrType(other, arrayRankOverride, isReferenceOverride, isPointerOverride, isConstOverride);
         }
 
         private MrType(
             MrType other,
-            bool? isArrayOverride = null,
+            int? arrayRankOverride = null,
             bool? isReferenceOverride = null,
             bool? isPointerOverride = null,
             bool? isConstOverride = null)
@@ -134,13 +136,13 @@ namespace MiddleweightReflection
                 IsReference = (bool)isReferenceOverride;
             }
 
-            if (isArrayOverride == null)
+            if (arrayRankOverride == null)
             {
-                IsArray = other.IsArray;
+                ArrayRank = other.ArrayRank;
             }
             else
             {
-                IsArray = (bool)isArrayOverride;
+                ArrayRank = (int)arrayRankOverride;
             }
         }
 
@@ -879,11 +881,18 @@ namespace MiddleweightReflection
         /// </summary>
         internal static string GetUnmodifiedTypeName(
             string name,
-            out bool isArray,
+            out int? arrayRank,
             out bool isReference,
             out bool isPointer)
         {
-            isArray = name.Contains("[");
+
+            arrayRank = null;
+            if(name.Contains("["))
+            {
+                // [] is a rank of 1, [,] is a rank of 2, etc.
+                arrayRank = name.Split(',').Length;
+            }
+
             isReference = name.Contains("&");
             isPointer = name.Contains("*");
 

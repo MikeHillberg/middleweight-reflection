@@ -106,10 +106,10 @@ namespace MiddleweightReflection
                 return MrType.CreateFromGenericParameterHandle(
                     elementType.GenericParameterHandle.Value,
                     elementType.Assembly,
-                    isArray: true);
+                    arrayRank: 1);
             }
 
-            return MrType.Clone(elementType, isArrayOverride: true); 
+            return MrType.Clone(elementType, arrayRankOverride: 1);
         }
 
         public virtual MrType GetPointerType(MrType elementType)
@@ -119,7 +119,10 @@ namespace MiddleweightReflection
 
         public virtual MrType GetByReferenceType(MrType elementType)
         {
-            return MrType.Clone(elementType, isArrayOverride: elementType.IsArray, isReferenceOverride: true);
+            return MrType.Clone(
+                elementType, 
+                arrayRankOverride: elementType.ArrayRank, 
+                isReferenceOverride: true);
         }
 
         public virtual MrType GetGenericMethodParameter(MRGenericContext genericContext, int index)
@@ -158,8 +161,9 @@ namespace MiddleweightReflection
 
         public virtual MrType GetArrayType(MrType elementType, ArrayShape shape)
         {
-            Debug.Assert(false);
-            throw new Exception("Not supported yet");
+            var newType = MrType.Clone(elementType, arrayRankOverride: shape.Rank);
+            return newType;
+
             //var builder = new StringBuilder();
 
             //builder.Append(elementType);
