@@ -251,7 +251,7 @@ namespace MiddleweightReflection
             }
             else
             {
-                Debug.Assert(name == reader.GetString(reader.GetAssemblyDefinition().Name));
+                Debug.Assert(name == reader.GetString(reader.GetAssemblyDefinition().Name) || name == "mscorlib");
 
                 // See if the assembly was already explicitly loaded
                 if (_loadedAssemblies.TryGetValue(name, out var loadedAssembly))
@@ -335,7 +335,7 @@ namespace MiddleweightReflection
 
             // Validate that the name of the assembly is what it's supposed to be
             var name = reader.GetString(reader.GetAssemblyDefinition().Name);
-            if (name != requestedName)
+            if (name != requestedName && requestedName != "mscorlib")
             {
                 throw new Exception($"Expected assembly name '{requestedName}', actual is '{name}'");
             }
