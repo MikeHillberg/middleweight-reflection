@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace MiddleweightReflection
 {
-    public class MrEvent
+    public class MrEvent : IMrHasCustomAttributes, IMrTypeMember
     {
         public EventDefinitionHandle DefinitionHandle { get; }
         public MrType DeclaringType { get; }

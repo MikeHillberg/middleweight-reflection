@@ -16,7 +16,7 @@ namespace MiddleweightReflection
     /// <summary>
     /// Represents a type from an assembly (get this from an MRAssembly class)
     /// </summary>
-    public class MrType
+    public class MrType : IMrHasCustomAttributes
     {
         internal TypeDefinitionHandle TypeDefinitionHandle { get; }
         internal TypeDefinition TypeDefinition { get; }

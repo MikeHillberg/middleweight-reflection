@@ -6,7 +6,7 @@ using System.Reflection.Metadata;
 
 namespace MiddleweightReflection
 {
-    public class MrField
+    public class MrField : IMrHasCustomAttributes, IMrTypeMember
     {
         public MrType DeclaringType { get; }
         public FieldDefinitionHandle DefinitionHandle { get; }

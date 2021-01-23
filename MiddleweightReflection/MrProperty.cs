@@ -12,7 +12,7 @@ namespace MiddleweightReflection
     /// <summary>
     /// A property of an MRType
     /// </summary>
-    public class MrProperty
+    public class MrProperty : IMrHasCustomAttributes, IMrTypeMember
     {
         public MrType DeclaringType { get; }
         public PropertyDefinitionHandle DefinitionHandle { get; }

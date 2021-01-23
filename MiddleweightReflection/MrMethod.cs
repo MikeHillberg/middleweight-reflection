@@ -12,7 +12,7 @@ namespace MiddleweightReflection
     /// <summary>
     /// Represents a method on the DeclaringType
     /// </summary>
-    public class MrMethod
+    public class MrMethod : IMrHasCustomAttributes, IMrTypeMember
     {
         public MrType DeclaringType { get; private set; }
         public MethodDefinitionHandle MethodDefinitionHandle { get; private set; }
