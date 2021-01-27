@@ -12,9 +12,9 @@ namespace MiddleweightReflection
     /// <summary>
     /// A property of an MRType
     /// </summary>
-    public class MrProperty
+    public class MrProperty : MrTypeAndMemberBase
     {
-        public MrType DeclaringType { get; }
+        override public MrType DeclaringType { get; }
         public PropertyDefinitionHandle DefinitionHandle { get; }
         public PropertyDefinition Definition { get; }
 
@@ -98,7 +98,7 @@ namespace MiddleweightReflection
             setter = MrMethod.TryGetMethod(propertyAccessors.Setter, declaringType, publicishOnly);
         }
 
-        public ImmutableArray<MrCustomAttribute> GetCustomAttributes()
+        override public ImmutableArray<MrCustomAttribute> GetCustomAttributes()
         {
             var customAttributeHandles = this.Definition.GetCustomAttributes();
             var customAttributes = MrAssembly.GetCustomAttributesFromHandles(customAttributeHandles, this.DeclaringType);
@@ -160,7 +160,7 @@ namespace MiddleweightReflection
             return propertySignature.ReturnType;
         }
 
-        public string GetName()
+        override public string GetName()
         {
             return Definition.Name.AsString(DeclaringType.Assembly);
         }

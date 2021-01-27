@@ -16,7 +16,7 @@ namespace MiddleweightReflection
     /// <summary>
     /// Represents a type from an assembly (get this from an MRAssembly class)
     /// </summary>
-    public class MrType
+    public class MrType : MrTypeAndMemberBase
     {
         internal TypeDefinitionHandle TypeDefinitionHandle { get; }
         internal TypeDefinition TypeDefinition { get; }
@@ -36,6 +36,8 @@ namespace MiddleweightReflection
         public bool IsConst { get; private set; }
 
         public bool IsAssembly { get; private set; }
+
+        public override MrType DeclaringType => this;
 
         public TypeAttributes Attributes
         {
@@ -804,7 +806,7 @@ namespace MiddleweightReflection
         /// The raw name of the type. Use GetPrettyName to make generic types look better.
         /// </summary>
         /// <returns></returns>
-        public string GetName()
+        override public string GetName()
         {
             return GetName(prettyName: false);
         }
@@ -818,7 +820,7 @@ namespace MiddleweightReflection
             return GetName(prettyName: true);
         }
 
-        string GetName(bool prettyName = true)
+        string GetName(bool prettyName)
         {
             // String will typically require less allocations than StringBuilder
             string name;
@@ -1132,7 +1134,7 @@ namespace MiddleweightReflection
             }
         }
 
-        public ImmutableArray<MrCustomAttribute> GetCustomAttributes()
+        override public ImmutableArray<MrCustomAttribute> GetCustomAttributes()
         {
             if (IsTypeCode || IsFakeType || IsGenericParameter)
             {

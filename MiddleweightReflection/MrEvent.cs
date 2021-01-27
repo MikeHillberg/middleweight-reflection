@@ -10,10 +10,10 @@ using System.Threading.Tasks;
 
 namespace MiddleweightReflection
 {
-    public class MrEvent
+    public class MrEvent : MrTypeAndMemberBase
     {
         public EventDefinitionHandle DefinitionHandle { get; }
-        public MrType DeclaringType { get; }
+        override public MrType DeclaringType { get; }
         public EventDefinition Definition { get; }
 
         private MrEvent(
@@ -86,7 +86,7 @@ namespace MiddleweightReflection
             }
         }
 
-        public ImmutableArray<MrCustomAttribute> GetCustomAttributes()
+        override public ImmutableArray<MrCustomAttribute> GetCustomAttributes()
         {
             var customAttributeHandles = this.Definition.GetCustomAttributes();
             var customAttributes = MrAssembly.GetCustomAttributesFromHandles(customAttributeHandles, this.DeclaringType);
@@ -100,7 +100,7 @@ namespace MiddleweightReflection
             return eventType;
         }
 
-        public string GetName()
+        override public string GetName()
         {
             return Definition.Name.AsString(DeclaringType.Assembly);
         }
