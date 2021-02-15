@@ -27,11 +27,6 @@ namespace MiddleweightReflection
             return $"MRAssembly: {(string.IsNullOrEmpty(this.Name) ? this.Location : this.Name)}";
         }
 
-        MrAssembly(MrLoadContext loadContext)
-        {
-            _loadContext = loadContext;
-        }
-
         private MrAssembly(MetadataReader reader, string location, MrLoadContext loadContext)
         {
             this.Location = location;
@@ -45,7 +40,7 @@ namespace MiddleweightReflection
             return mrAssembly;
         }
 
-        // This has to be called after the LoadContext has loaded all the assemblies,
+        // This must be called after the LoadContext has loaded all the assemblies,
         // so that we know which referent types have to be faked.
         internal void Initialize()
         {
@@ -71,7 +66,7 @@ namespace MiddleweightReflection
 
         internal static MrAssembly CreateFakeAssembly(string name, MrLoadContext loadContext)
         {
-            var mrAssembly = new MrAssembly(loadContext);
+            var mrAssembly = new MrAssembly(null, null, loadContext);
             mrAssembly.IsFakeAssembly = true;
             mrAssembly.Name = name;
             return mrAssembly;

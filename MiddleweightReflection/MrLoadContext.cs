@@ -56,11 +56,14 @@ namespace MiddleweightReflection
 
             // All the assemblies need to be loaded before they're initialized. That way we know how 
             // to resolve assembly references.
-            foreach (var assembly in _loadedAssemblies.Values.Union(_implicitAssemblies.Values))
-            {
-                assembly.Initialize();
-            }
+            // Note that _assembliesToInitialize can change as we iterate through this loop,
+            // because new fake assemblies might get generated. So use a for loop rather 
+            // than a foreach iterator.
 
+            for(int i = 0; i < _assembliesToInitialize.Count ; i++)
+            {
+                _assembliesToInitialize[i].Initialize();
+            }
         }
 
         public delegate string AssemblyPathFromNameCallback(string assemblyName);
@@ -294,8 +297,13 @@ namespace MiddleweightReflection
                 _loadedAssemblies[name] = newAssembly;
             }
 
+            // Remember to initialize this assembly in FinishLoading()
+            _assembliesToInitialize.Add(newAssembly);
+
             return newAssembly;
         }
+
+        List<MrAssembly> _assembliesToInitialize = new List<MrAssembly>();
 
 
         /// <summary>
