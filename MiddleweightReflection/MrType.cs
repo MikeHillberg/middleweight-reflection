@@ -360,7 +360,12 @@ namespace MiddleweightReflection
         /// <returns></returns>
         public MrType GetBaseType()
         {
-            if (IsTypeCode || IsFakeType || IsGenericParameter)
+            if (IsFakeType)
+            {
+                Assembly.LoadContext.RaiseFakeTypeRequired(GetFullName(), Assembly.FullName, out MrType subst);
+                return subst.GetBaseType();
+            }
+            if (IsTypeCode || IsGenericParameter)
             {
                 return null;
             }
