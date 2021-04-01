@@ -63,6 +63,40 @@ namespace MiddleweightReflection
             return parameterType;
         }
 
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as MrParameter;
+            if (other == null)
+            {
+                return false;
+            }
+
+            if (this.Method != other.Method)
+            {
+                return false;
+            }
+
+            if (this.GetParameterName() != other.GetParameterName())
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool operator ==(MrParameter parameter1, MrParameter parameter2)
+        {
+            return parameter1.Equals(parameter2);
+        }
+
+        public static bool operator !=(MrParameter parameter1, MrParameter parameter2)
+        {
+            return !parameter1.Equals(parameter2);
+        }
+
+
+
         /// <summary>
         /// The parameter's name (not the parameter's type)
         /// </summary>

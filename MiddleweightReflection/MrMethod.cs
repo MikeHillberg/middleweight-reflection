@@ -31,6 +31,51 @@ namespace MiddleweightReflection
             return $"MrMethod: {DeclaringType.GetPrettyName()}.{GetName()}";
         }
 
+        public override bool Equals(object obj)
+        {
+            var other = obj as MrMethod;
+            if (other == null)
+            {
+                return false;
+            }
+
+            if (this.DeclaringType != other.DeclaringType
+                || this.GetName() != other.GetName())
+            {
+                return false;
+            }
+
+            var thisParameters = this.GetParameters();
+            var otherParameters = other.GetParameters();
+
+            if(thisParameters.Length != otherParameters.Length)
+            {
+                return false;
+            }
+
+            for(int i = 0; i < thisParameters.Length; i++)
+            {
+                if(thisParameters[i].GetParameterType() != otherParameters[i].GetParameterType())
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static bool operator ==(MrMethod method1, MrMethod method2)
+        {
+            return method1.Equals(method2);
+        }
+
+        public static bool operator !=(MrMethod method1, MrMethod method2)
+        {
+            return !method1.Equals(method2);
+        }
+
+
+
         static internal bool IsPublicMethodAttributes(MethodAttributes attributes)
         {
             return (attributes & MethodAttributes.MemberAccessMask) == MethodAttributes.Public;

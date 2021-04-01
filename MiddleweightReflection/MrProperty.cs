@@ -31,6 +31,37 @@ namespace MiddleweightReflection
             Definition = propertyDefinition;
         }
 
+        public override bool Equals(object obj)
+        {
+            var other = obj as MrProperty;
+            if (other == null)
+            {
+                return false;
+            }
+
+            if(this.DeclaringType != other.DeclaringType)
+            {
+                return false;
+            }
+
+            if(this.GetName() != other.GetName())
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool operator ==(MrProperty property1, MrProperty property2)
+        {
+            return property1.Equals(property2);
+        }
+
+        public static bool operator !=(MrProperty property1, MrProperty property2)
+        {
+            return !property1.Equals(property2);
+        }
+
         internal static MrProperty TryGetProperty(
             MrType declaringType, 
             PropertyDefinitionHandle propertyDefinitionHandle,

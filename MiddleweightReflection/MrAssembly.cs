@@ -278,6 +278,26 @@ namespace MiddleweightReflection
 
             return customAttributes;
         }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as MrAssembly;
+            if(other == null)
+            {
+                return false;
+            }
+
+            return this.FullName == other.FullName;
+        }
+
+        public static bool operator==(MrAssembly assembly1, MrAssembly assembly2)
+        {
+            return assembly1.Equals(assembly2);
+        }
+        public static bool operator !=(MrAssembly assembly1, MrAssembly assembly2)
+        {
+            return !assembly1.Equals(assembly2);
+        }
     }
 
 }

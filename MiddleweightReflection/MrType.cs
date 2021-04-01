@@ -39,6 +39,28 @@ namespace MiddleweightReflection
 
         public override MrType DeclaringType => this;
 
+        public override bool Equals(object obj)
+        {
+            var other = obj as MrType;
+            if(other == null)
+            {
+                return false;
+            }
+
+            return this.Assembly.FullName == other.Assembly.FullName
+                   && this.GetFullName() == other.GetFullName();
+        }
+
+        public static bool operator== (MrType type1, MrType type2)
+        {
+            return type1.Equals(type2);
+        }
+
+        public static bool operator !=(MrType type1, MrType type2)
+        {
+            return !type1.Equals(type2);
+        }
+
         public TypeAttributes Attributes
         {
             get

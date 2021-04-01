@@ -104,5 +104,36 @@ namespace MiddleweightReflection
         {
             return Definition.Name.AsString(DeclaringType.Assembly);
         }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as MrEvent;
+            if (other == null)
+            {
+                return false;
+            }
+
+            if (this.DeclaringType != other.DeclaringType)
+            {
+                return false;
+            }
+
+            if (this.GetName() != other.GetName())
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool operator ==(MrEvent event1, MrEvent event2)
+        {
+            return event1.Equals(event2);
+        }
+
+        public static bool operator !=(MrEvent event1, MrEvent event2)
+        {
+            return !event1.Equals(event2);
+        }
     }
 }
