@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Metadata;
@@ -26,6 +27,37 @@ namespace MiddleweightReflection
             _parameterIndex = parameterIndex;
 
             _parameter = Method.DeclaringType.Assembly.Reader.GetParameter(_parameterHandle);
+        }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as MrParameter;
+            var prolog = MrLoadContext.OverrideEqualsProlog(this, other);
+            if (prolog != null)
+            {
+                return (bool)prolog;
+            }
+
+            var matches = 
+                this.Method == other.Method
+                && this._parameterHandle == other._parameterHandle;
+
+            return matches;
+        }
+
+        public static bool operator ==(MrParameter operand1, MrParameter operand2)
+        {
+            return MrLoadContext.OperatorEquals(operand1, operand2);
+        }
+
+        public static bool operator !=(MrParameter operand1, MrParameter operand2)
+        {
+            return !(operand1 == operand2);
+        }
+
+        public override int GetHashCode()
+        {
+            return this._parameterHandle.GetHashCode();
         }
 
         /// <summary>
@@ -63,37 +95,6 @@ namespace MiddleweightReflection
             return parameterType;
         }
 
-
-        public override bool Equals(object obj)
-        {
-            var other = obj as MrParameter;
-            if (other == null)
-            {
-                return false;
-            }
-
-            if (this.Method != other.Method)
-            {
-                return false;
-            }
-
-            if (this.GetParameterName() != other.GetParameterName())
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        public static bool operator ==(MrParameter parameter1, MrParameter parameter2)
-        {
-            return parameter1.Equals(parameter2);
-        }
-
-        public static bool operator !=(MrParameter parameter1, MrParameter parameter2)
-        {
-            return !parameter1.Equals(parameter2);
-        }
 
 
 

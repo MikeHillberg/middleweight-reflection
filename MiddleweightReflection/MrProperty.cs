@@ -31,36 +31,6 @@ namespace MiddleweightReflection
             Definition = propertyDefinition;
         }
 
-        public override bool Equals(object obj)
-        {
-            var other = obj as MrProperty;
-            if (other == null)
-            {
-                return false;
-            }
-
-            if(this.DeclaringType != other.DeclaringType)
-            {
-                return false;
-            }
-
-            if(this.GetName() != other.GetName())
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        public static bool operator ==(MrProperty property1, MrProperty property2)
-        {
-            return property1.Equals(property2);
-        }
-
-        public static bool operator !=(MrProperty property1, MrProperty property2)
-        {
-            return !property1.Equals(property2);
-        }
 
         internal static MrProperty TryGetProperty(
             MrType declaringType, 
@@ -113,6 +83,36 @@ namespace MiddleweightReflection
         {
             return $"MrProperty: {DeclaringType.GetName()}.{GetName()}";
         }
+
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as MrProperty;
+            var prolog = MrLoadContext.OverrideEqualsProlog(this, other);
+            if (prolog != null)
+            {
+                return (bool)prolog;
+            }
+
+            return this.DeclaringType == other.DeclaringType
+                && this.DefinitionHandle == other.DefinitionHandle;
+        }
+
+        public static bool operator ==(MrProperty operand1, MrProperty operand2)
+        {
+            return MrLoadContext.OperatorEquals(operand1, operand2);
+        }
+
+        public static bool operator !=(MrProperty operand1, MrProperty operand2)
+        {
+            return !(operand1 == operand2);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.DefinitionHandle.GetHashCode();
+        }
+
 
         /// <summary>
         /// The property's getter and setter, either of which could be null

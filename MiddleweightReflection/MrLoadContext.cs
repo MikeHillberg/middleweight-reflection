@@ -443,6 +443,34 @@ namespace MiddleweightReflection
             }
         }
 
+        // Common implementation of operator==
+        static internal bool OperatorEquals<T>(T op1, T op2) where T : class
+        {
+            if (op1 == null)
+            {
+                return op2 == null;
+            }
+
+            return op1.Equals(op2);
+        }
+
+        // Common code for the start of every Equals override method
+        static internal bool? OverrideEqualsProlog<T>(T op1, T op2) where T : class
+        {
+            // Optimization: if they're equal, they'll often be the same instance
+            if (Object.ReferenceEquals(op1, op2))
+            {
+                return true;
+            }
+
+            if (op2 == null)
+            {
+                return false;
+            }
+
+            return null;
+        }
+
 
     }
 }

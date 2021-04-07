@@ -31,48 +31,6 @@ namespace MiddleweightReflection
             return $"MrMethod: {DeclaringType.GetPrettyName()}.{GetName()}";
         }
 
-        public override bool Equals(object obj)
-        {
-            var other = obj as MrMethod;
-            if (other == null)
-            {
-                return false;
-            }
-
-            if (this.DeclaringType != other.DeclaringType
-                || this.GetName() != other.GetName())
-            {
-                return false;
-            }
-
-            var thisParameters = this.GetParameters();
-            var otherParameters = other.GetParameters();
-
-            if(thisParameters.Length != otherParameters.Length)
-            {
-                return false;
-            }
-
-            for(int i = 0; i < thisParameters.Length; i++)
-            {
-                if(thisParameters[i].GetParameterType() != otherParameters[i].GetParameterType())
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public static bool operator ==(MrMethod method1, MrMethod method2)
-        {
-            return method1.Equals(method2);
-        }
-
-        public static bool operator !=(MrMethod method1, MrMethod method2)
-        {
-            return !method1.Equals(method2);
-        }
 
 
 
@@ -212,6 +170,40 @@ namespace MiddleweightReflection
                 DeclaringType.Assembly.TypeProvider,
                 context);
         }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as MrMethod;
+            var prolog = MrLoadContext.OverrideEqualsProlog(this, other);
+            if (prolog != null)
+            {
+                return (bool)prolog;
+            }
+
+            if( this.DeclaringType != other.DeclaringType
+                || this.MethodDefinitionHandle != other.MethodDefinitionHandle )
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool operator ==(MrMethod operand1, MrMethod operand2)
+        {
+            return MrLoadContext.OperatorEquals(operand1, operand2);
+        }
+
+        public static bool operator !=(MrMethod operand1, MrMethod operand2)
+        {
+            return !(operand1 == operand2);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.MethodDefinitionHandle.GetHashCode();
+        }
+
 
         public bool GetIsConstructor()
         {

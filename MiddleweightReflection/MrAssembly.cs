@@ -282,21 +282,28 @@ namespace MiddleweightReflection
         public override bool Equals(object obj)
         {
             var other = obj as MrAssembly;
-            if(other == null)
+            var prolog = MrLoadContext.OverrideEqualsProlog(this, other);
+            if (prolog != null)
             {
-                return false;
+                return (bool)prolog;
             }
 
-            return this.FullName == other.FullName;
+            return this.Reader == other.Reader;
         }
 
-        public static bool operator==(MrAssembly assembly1, MrAssembly assembly2)
+        public static bool operator ==(MrAssembly operand1, MrAssembly operand2)
         {
-            return assembly1.Equals(assembly2);
+            return MrLoadContext.OperatorEquals(operand1, operand2);
         }
-        public static bool operator !=(MrAssembly assembly1, MrAssembly assembly2)
+
+        public static bool operator !=(MrAssembly operand1, MrAssembly operand2)
         {
-            return !assembly1.Equals(assembly2);
+            return !(operand1 == operand2);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Reader.GetHashCode();
         }
     }
 

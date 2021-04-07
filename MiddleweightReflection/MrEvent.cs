@@ -26,6 +26,40 @@ namespace MiddleweightReflection
             DeclaringType = declaringType;
         }
 
+        public override bool Equals(object obj)
+        {
+            var other = obj as MrEvent;
+            var prolog = MrLoadContext.OverrideEqualsProlog(this, other);
+            if (prolog != null)
+            {
+                return (bool)prolog;
+            }
+
+            if (this.DeclaringType != other.DeclaringType
+                || this.DefinitionHandle != other.DefinitionHandle)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool operator ==(MrEvent operand1, MrEvent operand2)
+        {
+            return MrLoadContext.OperatorEquals(operand1, operand2);
+        }
+
+        public static bool operator !=(MrEvent operand1, MrEvent operand2)
+        {
+            return !(operand1 == operand2);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.DefinitionHandle.GetHashCode();
+        }
+
+
         static internal MrEvent TryGetEvent(
             EventDefinitionHandle eventDefinitionHandle, 
             MrType declaringType,
@@ -105,35 +139,5 @@ namespace MiddleweightReflection
             return Definition.Name.AsString(DeclaringType.Assembly);
         }
 
-        public override bool Equals(object obj)
-        {
-            var other = obj as MrEvent;
-            if (other == null)
-            {
-                return false;
-            }
-
-            if (this.DeclaringType != other.DeclaringType)
-            {
-                return false;
-            }
-
-            if (this.GetName() != other.GetName())
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        public static bool operator ==(MrEvent event1, MrEvent event2)
-        {
-            return event1.Equals(event2);
-        }
-
-        public static bool operator !=(MrEvent event1, MrEvent event2)
-        {
-            return !event1.Equals(event2);
-        }
     }
 }
