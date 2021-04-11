@@ -9,6 +9,7 @@ public class UnitTestSampleAssembly.Class1<T1,T2,T3> : System.Object
     T1 PublicT1WriteableProperty { get; set; }
     System.Int32 this.[System.Int32]
     UnitTestSampleAssembly.Class1<T1,T2,T3> Self { get; }
+    UnitTestSampleAssembly.Class1<System.IO.Stream,System.Int32,System.Object> ClosedSelf { get; }
     System.EventHandler<System.EventArgs> PublicEvent { add; remove; }
     static System.String StaticPublicStringMethod2(System.String arg1, System.Int32 arg2)
     protected System.Void ProtectedVirtualVoidMethod0()
