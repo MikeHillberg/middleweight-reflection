@@ -162,8 +162,10 @@ namespace MiddleweightReflection
 
         public virtual MrType GetArrayType(MrType elementType, ArrayShape shape)
         {
-            Debug.Assert(false);
-            throw new Exception("Not supported yet");
+            var arrayType = MrType.Clone(elementType, isArrayOverride: true);
+            return arrayType;
+
+
             //var builder = new StringBuilder();
 
             //builder.Append(elementType);
