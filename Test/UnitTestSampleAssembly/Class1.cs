@@ -25,6 +25,7 @@ namespace UnitTestSampleAssembly
         public int this[int i] { get { return i; } }
 
         public Class1<T1, T2, T3> Self => this;
+        public Class1<Stream,int,object> ClosedSelf { get; }
 
         [TestAttribute]
         static public string StaticPublicStringMethod2(string arg1, int arg2) { return ""; }

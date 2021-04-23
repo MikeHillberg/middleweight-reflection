@@ -278,6 +278,33 @@ namespace MiddleweightReflection
 
             return customAttributes;
         }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as MrAssembly;
+            var prolog = MrLoadContext.OverrideEqualsProlog(this, other);
+            if (prolog != null)
+            {
+                return (bool)prolog;
+            }
+
+            return this.Reader == other.Reader;
+        }
+
+        public static bool operator ==(MrAssembly operand1, MrAssembly operand2)
+        {
+            return MrLoadContext.OperatorEquals(operand1, operand2);
+        }
+
+        public static bool operator !=(MrAssembly operand1, MrAssembly operand2)
+        {
+            return !(operand1 == operand2);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Reader.GetHashCode();
+        }
     }
 
 }

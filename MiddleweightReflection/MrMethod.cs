@@ -31,6 +31,9 @@ namespace MiddleweightReflection
             return $"MrMethod: {DeclaringType.GetPrettyName()}.{GetName()}";
         }
 
+
+
+
         static internal bool IsPublicMethodAttributes(MethodAttributes attributes)
         {
             return (attributes & MethodAttributes.MemberAccessMask) == MethodAttributes.Public;
@@ -167,6 +170,40 @@ namespace MiddleweightReflection
                 DeclaringType.Assembly.TypeProvider,
                 context);
         }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as MrMethod;
+            var prolog = MrLoadContext.OverrideEqualsProlog(this, other);
+            if (prolog != null)
+            {
+                return (bool)prolog;
+            }
+
+            if( this.DeclaringType != other.DeclaringType
+                || this.MethodDefinitionHandle != other.MethodDefinitionHandle )
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool operator ==(MrMethod operand1, MrMethod operand2)
+        {
+            return MrLoadContext.OperatorEquals(operand1, operand2);
+        }
+
+        public static bool operator !=(MrMethod operand1, MrMethod operand2)
+        {
+            return !(operand1 == operand2);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.MethodDefinitionHandle.GetHashCode();
+        }
+
 
         public bool GetIsConstructor()
         {

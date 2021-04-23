@@ -151,8 +151,12 @@ namespace MiddleweightReflection
         {
             //return genericType + "<" + string.Join(",", typeArguments) + ">";
 
+            // Clone the open type
             var newType = MrType.Clone(genericType);
-            newType.SetGenericArguments(typeArguments);
+
+            // Then set the type arguments. Note that the typeArguments might actually type parameters, so this 
+            // won't neceessarily produce a closed type.
+            newType.SetGenericArguments(typeArguments); 
             return newType;
         }
 
