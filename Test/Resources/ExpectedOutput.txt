@@ -26,10 +26,12 @@ public class UnitTestSampleAssembly.Class2<T1> : UnitTestSampleAssembly.Class1<T
     protected System.Void ProtectedVirtualVoidMethod0()
     protected System.Void ProtectedAbstractVoidMethod0()
 
-class UnitTestSampleAssembly.Class3 : UnitTestSampleAssembly.Class2<System.IO.Stream>
-    AutoLayout, AnsiClass, Class, BeforeFieldInit
+public class UnitTestSampleAssembly.Class3 : UnitTestSampleAssembly.Class2<System.IO.Stream>
+    AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
     [ObsoleteAttribute(Test attribute)]
+    nested Class3+NestedInClass3
     UnitTestSampleAssembly.Class3()
+    UnitTestSampleAssembly.Class3 PropOfNestedType { get; }
 
 public class UnitTestSampleAssembly.ExplicitInterfacesClass : System.Object
     AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
@@ -71,3 +73,8 @@ public class UnitTestSampleAssembly.TestAttribute : System.Attribute
     AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
     [AttributeUsageAttribute(32767)]
     UnitTestSampleAssembly.TestAttribute()
+
+public class Class3+NestedInClass3 : System.Object (nested)
+    AutoLayout, AnsiClass, Class, NestedPublic, BeforeFieldInit
+    Class3+NestedInClass3()
+    System.Int32 IntProp { get; }

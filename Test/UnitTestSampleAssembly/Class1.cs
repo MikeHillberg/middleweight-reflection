@@ -63,11 +63,30 @@ namespace UnitTestSampleAssembly
         protected override void ProtectedVirtualVoidMethod0() { base.ProtectedVirtualVoidMethod0(); }
         protected override void ProtectedAbstractVoidMethod0() { return; }
         internal override void InternalVirtualVoidMethod0() { base.InternalVirtualVoidMethod0(); }
+        protected internal void ProtectedInternalMethod() { }
     }
 
     [Obsolete("Test attribute")]
-    class Class3 : Class2<Stream>
+    public class Class3 : Class2<Stream>
     {
+        public class NestedInClass3
+        {
+            internal NestedInClass3() { }
+            internal int InternalProp { get; }
+            private int PrivateField;
+            internal void InternalMethod() { return; }
+            private event EventHandler PrivateEvent;
+        }
+
+        public NestedInClass3 PropOfNestedType { get; }
+
+        private class PrivateNestedInClass3
+        {
+        }
+
+        protected internal class ProtectedInternalNestedInClass3
+        {
+        }
     }
 
     public class ExplicitInterfacesClass : IPublicInterface, IInternalInterface

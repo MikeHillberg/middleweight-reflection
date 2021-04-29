@@ -35,11 +35,11 @@ namespace MiddleweightReflection
                 : reader.GetString(definition.Namespace) + "." + reader.GetString(definition.Name);
 
             // bugbug
-            //if (definition.Attributes.IsNested())
-            //{
-            //    TypeDefinitionHandle declaringTypeHandle = definition.GetDeclaringType();
-            //    return GetTypeFromDefinition(reader, declaringTypeHandle, 0) + "/" + name;
-            //}
+            if (definition.IsNested)
+            {
+                TypeDefinitionHandle declaringTypeHandle = definition.GetDeclaringType();
+                return GetTypeFromDefinition(reader, declaringTypeHandle, 0);  // + "/" + name;
+            }
 
             return handle.AsMrType(Assembly);
         }

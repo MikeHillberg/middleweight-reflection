@@ -499,7 +499,8 @@ namespace MiddleweightReflection
                 }
 
                 // TypeAttributes doesn't look like a bit mask, but it is, so you can't just check for Public
-                return (TypeDefinition.Attributes & TypeAttributes.VisibilityMask) == TypeAttributes.Public;
+                var maskedAttributes = TypeDefinition.Attributes & TypeAttributes.VisibilityMask;
+                return maskedAttributes == TypeAttributes.Public || maskedAttributes == TypeAttributes.NestedPublic;
             }
         }
 
@@ -527,10 +528,25 @@ namespace MiddleweightReflection
                 }
 
                 var attributes = TypeDefinition.Attributes;
-                return !attributes.HasFlag(TypeAttributes.Public) && !attributes.HasFlag(TypeAttributes.NotPublic);
+                return 
+                    !attributes.HasFlag(TypeAttributes.Public) && !attributes.HasFlag(TypeAttributes.NotPublic)
+                    || attributes.HasFlag(TypeAttributes.NestedFamORAssem); // protected internal
             }
         }
 
+        public bool IsProtected
+        {
+            get
+            {
+                if (IsTypeCode || IsFakeType)
+                {
+                    return false;
+                }
+
+                var attributes = TypeDefinition.Attributes;
+                return attributes.HasFlag(TypeAttributes.NestedFamORAssem); // protected internal
+            }
+        }
 
         public bool IsStatic
         {
@@ -992,6 +1008,24 @@ namespace MiddleweightReflection
             return propertiesList == null ? ImmutableArray<MrProperty>.Empty : propertiesList.ToImmutableArray();
         }
 
+        public ImmutableArray<MrType> GetNestedTypes()
+        {
+            List<MrType> mrTypeList = null;
+            var nestedTypeDefinitionHandles = this.TypeDefinition.GetNestedTypes();
+            foreach(var nestedTypeDefinition in nestedTypeDefinitionHandles)
+            {
+                if(mrTypeList == null)
+                {
+                    mrTypeList = new List<MrType>();
+                }
+                mrTypeList.Add(MrType.CreateFromTypeDefinition(nestedTypeDefinition, this.Assembly));
+            }
+
+            return mrTypeList == null ? ImmutableArray<MrType>.Empty : mrTypeList.ToImmutableArray();
+        }
+
+        public bool IsNestedType => this.TypeDefinition.IsNested;
+
         /// <summary>
         /// Get events tfor this type
         /// </summary>
@@ -1067,6 +1101,11 @@ namespace MiddleweightReflection
             var typeNameBuilder = new StringBuilder();
             if (typeDefinition.IsNested)
             {
+                // This is a nested type, like B nested in A, so we want to produce the name
+                // "A+B". GetDeclaryingType() will return A, so we'll start "A+", and then below
+                // (after the 'if' block) we'll add the "B". Note that this is recursing because we 
+                // could be a nested type inside a nested type.
+
                 var declaringTypeDefinitionHandle = typeDefinition.GetDeclaringType();
                 var declaringTypeDefinition = reader.GetTypeDefinition(declaringTypeDefinitionHandle);
                 typeNameBuilder.Append(GetTypeNameFromTypeDefinition(reader, declaringTypeDefinition));
