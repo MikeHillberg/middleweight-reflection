@@ -204,9 +204,17 @@ namespace MRUnitTests
 
                 if (itemPropertyType == null)
                 {
-                    result.Append($"    {property.GetPropertyType().GetPrettyFullName()} {propertyName} {{ get; ");
+                    result.Append($"    {property.GetPropertyType().GetPrettyFullName()} {propertyName} {{ ");
+
+                    if (property.Getter != null)
+                    {
+                        WriteMethodAccess(property.Getter.MethodDefinition.Attributes, result);
+                        result.Append(" get; "); 
+                    }
+
                     if (property.Setter != null)
                     {
+                        WriteMethodAccess(property.Setter.MethodDefinition.Attributes, result);
                         result.Append($"set; ");
                     }
                     result.AppendLine("}");
@@ -221,7 +229,10 @@ namespace MRUnitTests
 
             foreach (var ev in mrType.GetEvents(publicishOnly))
             {
-                result.AppendLine($"    {ev.GetEventType().GetPrettyFullName()} {ev.GetName()} {{ add; remove; }}");
+                ev.GetAccessors(out var addr, out var remover);
+                result.AppendLine($"    ");
+                WriteMethodAccess(addr.MethodDefinition.Attributes, result);
+                result.AppendLine($" {ev.GetEventType().GetPrettyFullName()} {ev.GetName()} {{ add; remove; }}");
             }
 
             // Write methods
@@ -229,7 +240,7 @@ namespace MRUnitTests
             foreach (var method in methods)
             {
                 result.Append("    ");
-                WriteMethodAttributes(method.MethodDefinition.Attributes, result);
+                WriteMethodAccess(method.MethodDefinition.Attributes, result);
 
                 result.Append($"{method.ReturnType} {method.GetName()}(");
                 var parameters = method.GetParameters();
@@ -256,7 +267,7 @@ namespace MRUnitTests
             }
         }
 
-        private static void WriteMethodAttributes(MethodAttributes attributes, StringBuilder result)
+        private static void WriteMethodAccess(MethodAttributes attributes, StringBuilder result)
         {
             if (attributes.HasFlag(MethodAttributes.Private))
             {
@@ -267,6 +278,12 @@ namespace MRUnitTests
             {
                 result.Append("protected ");
             }
+
+            if (attributes.HasFlag(MethodAttributes.Assembly))
+            {
+                result.Append("internal ");
+            }
+
             if (attributes.HasFlag(MethodAttributes.Static))
             {
                 result.Append("static ");

@@ -76,6 +76,7 @@ namespace UnitTestSampleAssembly
             private int PrivateField;
             internal void InternalMethod() { return; }
             private event EventHandler PrivateEvent;
+            public int PropertyWithDifferentAccessors { get; private set; }
         }
 
         public NestedInClass3 PropOfNestedType { get; }
