@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
@@ -104,6 +105,11 @@ namespace MRUnitTests
             if (mrType.IsProtected) // Nested types can be 'protected internal'
             {
                 result.Append("protected ");
+            }
+
+            if (mrType.IsPrivate)
+            {
+                result.Append("private ");
             }
 
             var classKind = "";
@@ -232,7 +238,8 @@ namespace MRUnitTests
 
             // Write events
 
-            foreach (var ev in mrType.GetEvents(publicishOnly))
+            var typeEvents = mrType.GetEvents(publicishOnly);
+            foreach (var ev in typeEvents)
             {
                 result.Append($"    ");
 
@@ -262,10 +269,34 @@ namespace MRUnitTests
                 result.AppendLine(")");
             }
 
+            // See later comment where this is used
+            List<string> typeEventNames = null;
+            if (!publicishOnly)
+            {
+                typeEventNames = new List<string>();
+                foreach(var ev in typeEvents)
+                {
+                    typeEventNames.Add(ev.GetName());
+                }
+            }
+
+
             // Write fields
 
             foreach (var field in mrType.GetFields(publicishOnly))
             {
+                var name = field.GetName();
+
+                // If we're showing private members, we're going to see private events twice;
+                // once as an event and then again as a field.
+                if (!publicishOnly)
+                {
+                    if(typeEventNames.Contains(name))
+                    {
+                        continue;
+                    }
+                }
+
                 if (mrType.IsEnum)
                 {
                     if (!field.IsSpecialName) // Ignore special value__ field

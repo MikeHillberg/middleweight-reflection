@@ -15,6 +15,7 @@ namespace UnitTestSampleAssembly
         where T1 : Stream
         where T3 : class
     {
+        // This doesn't show up in the metadata
         static Class1() { return; }
 
         [TestAttribute]
@@ -47,7 +48,7 @@ namespace UnitTestSampleAssembly
         : Class1<T1, string, string>, IPublicInterface
         where T1 : Stream
     {
-        protected Class2() { }
+        protected Class2()  { }
 
         public string PublicInterfaceStringMethod() { throw new NotImplementedException(); }
 
@@ -84,6 +85,14 @@ namespace UnitTestSampleAssembly
         private class PrivateNestedInClass3
         {
         }
+
+        protected class ProtectedNestedInClass3
+        {
+        }
+        internal class InternalNestedInClass3
+        {
+        }
+
 
         protected internal class ProtectedInternalNestedInClass3
         {

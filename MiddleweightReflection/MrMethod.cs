@@ -75,6 +75,11 @@ namespace MiddleweightReflection
         {
             var attributes = this.MethodDefinition.Attributes;
 
+            // System.Reflection.MethodAttributes.Family
+            // | System.Reflection.MethodAttributes.HideBySig
+            // | System.Reflection.MethodAttributes.SpecialName
+            // | System.Reflection.MethodAttributes.RTSpecialName
+
             var modifiers = new ParsedMethodAttributes();
 
             modifiers.IsPublic = MrMethod.IsPublicMethodAttributes(attributes);

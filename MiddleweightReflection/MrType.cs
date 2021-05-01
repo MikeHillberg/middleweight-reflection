@@ -527,12 +527,29 @@ namespace MiddleweightReflection
                     return false;
                 }
 
-                var attributes = TypeDefinition.Attributes;
-                return 
+                var attributes = TypeDefinition.Attributes & TypeAttributes.VisibilityMask;
+                return
                     !attributes.HasFlag(TypeAttributes.Public) && !attributes.HasFlag(TypeAttributes.NotPublic)
-                    || attributes.HasFlag(TypeAttributes.NestedFamORAssem); // protected internal
+                    || attributes == TypeAttributes.NestedAssembly // Internal
+                    || attributes == TypeAttributes.NestedFamORAssem; // protected internal
             }
         }
+
+        public bool IsPrivate
+        {
+            get
+            {
+                if (IsTypeCode || IsFakeType)
+                {
+                    return false;
+                }
+
+                return
+                    (TypeDefinition.Attributes & TypeAttributes.VisibilityMask)
+                    == TypeAttributes.NestedPrivate;
+            }
+        }
+
 
         public bool IsProtected
         {
@@ -543,8 +560,12 @@ namespace MiddleweightReflection
                     return false;
                 }
 
-                var attributes = TypeDefinition.Attributes;
-                return attributes.HasFlag(TypeAttributes.NestedFamORAssem); // protected internal
+                var attributes = TypeDefinition.Attributes & TypeAttributes.VisibilityMask;
+
+                return
+                    attributes == TypeAttributes.NestedFamily
+                    || attributes == TypeAttributes.NestedFamORAssem;
+
             }
         }
 
@@ -951,6 +972,8 @@ namespace MiddleweightReflection
 
                 var isConstructor = mrMethod.GetIsConstructor();
 
+                // Ignore things like the get_/set_ methods for properties.
+                // Don't ignore constructors though; SpecialName is set for the static constructor
                 if (mrMethod.MethodDefinition.Attributes.HasFlag(MethodAttributes.SpecialName) && !isConstructor)
                 {
                     continue;
