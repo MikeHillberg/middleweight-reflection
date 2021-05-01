@@ -1080,10 +1080,18 @@ namespace MiddleweightReflection
 
                 // For a property named Foo, the compiler may generate a private field named
                 // <Foo>k__BackingField
-                if (field.GetName().EndsWith(">k__BackingField"))
+                if (field.IsPrivate && field.GetName().EndsWith(">k__BackingField"))
                 {
                     continue;
                 }
+
+                // Bugbug: For an event named FooHappened, the compiler generates a private field named
+                // FooHappened. How to filter this out? If you're only looking for public types and the
+                // event is public, it's not an issue. But if you're also looking non-public types,
+                // you'll see FooHappened as both an event and a field. There doesn't seem to be any
+                // kind of marking in the metadata to indicate that the field is special.
+                // I think maybe you need to check to see if there's an event and field by the same
+                // name, but I hate to take that overhead on every field lookup.
 
                 if (fieldsList == null)
                 {

@@ -178,12 +178,15 @@ namespace MRUnitTests
 
             foreach (var constructor in constructors)
             {
-                var typeName = constructor.DeclaringType.GetPrettyFullName();
+                var typeName = constructor.DeclaringType.GetPrettyName();
                 if(mrType.IsNestedType)
                 {
                     typeName = typeName.Split('+').Last();
                 }
-                result.Append($"    {typeName}(");
+
+                result.Append("    ");
+                WriteMethodAccess(constructor, result);
+                result.Append($"{typeName}(");
 
                 var parameters = constructor.GetParameters();
                 WriteParameters(parameters, result);
@@ -208,20 +211,22 @@ namespace MRUnitTests
 
                     if (property.Getter != null)
                     {
-                        WriteMethodAccess(property.Getter.MethodDefinition.Attributes, result);
-                        result.Append(" get; "); 
+                        WriteMethodAccess(property.Getter, result);
+                        result.Append("get; "); 
                     }
 
                     if (property.Setter != null)
                     {
-                        WriteMethodAccess(property.Setter.MethodDefinition.Attributes, result);
+                        WriteMethodAccess(property.Setter, result);
                         result.Append($"set; ");
                     }
                     result.AppendLine("}");
                 }
                 else
                 {
-                    result.AppendLine($"    {property.GetPropertyType().GetPrettyFullName()} this.[{itemPropertyType}]");
+                    result.Append("    ");
+                    WriteMethodAccess(property.Getter, result);
+                    result.AppendLine($"{property.GetPropertyType().GetPrettyFullName()} this.[{itemPropertyType}]");
                 }
             }
 
@@ -229,10 +234,19 @@ namespace MRUnitTests
 
             foreach (var ev in mrType.GetEvents(publicishOnly))
             {
-                ev.GetAccessors(out var addr, out var remover);
-                result.AppendLine($"    ");
-                WriteMethodAccess(addr.MethodDefinition.Attributes, result);
-                result.AppendLine($" {ev.GetEventType().GetPrettyFullName()} {ev.GetName()} {{ add; remove; }}");
+                result.Append($"    ");
+
+                ev.GetAccessors(out var adder, out var remover);
+                if (adder == null)
+                {
+                    result.Append("private ");
+                }
+                else
+                {
+                    WriteMethodAccess(adder, result);
+                }
+
+                result.AppendLine($"{ev.GetEventType().GetPrettyFullName()} {ev.GetName()} {{ add; remove; }}");
             }
 
             // Write methods
@@ -240,7 +254,7 @@ namespace MRUnitTests
             foreach (var method in methods)
             {
                 result.Append("    ");
-                WriteMethodAccess(method.MethodDefinition.Attributes, result);
+                WriteMethodAccess(method, result);
 
                 result.Append($"{method.ReturnType} {method.GetName()}(");
                 var parameters = method.GetParameters();
@@ -267,24 +281,31 @@ namespace MRUnitTests
             }
         }
 
-        private static void WriteMethodAccess(MethodAttributes attributes, StringBuilder result)
+        private static void WriteMethodAccess(MrMethod method, StringBuilder result)
         {
-            if (attributes.HasFlag(MethodAttributes.Private))
+            var access = method.GetMethodAccess();
+
+            if(access.IsPublic)
+            {
+                result.Append("public ");
+            }
+
+            if(access.IsPrivate)
             {
                 result.Append("private ");
             }
 
-            if (attributes.HasFlag(MethodAttributes.Family) && !attributes.HasFlag(MethodAttributes.Public))
+            if(access.IsProtected)
             {
                 result.Append("protected ");
             }
 
-            if (attributes.HasFlag(MethodAttributes.Assembly))
+            if(access.IsInternal)
             {
                 result.Append("internal ");
             }
 
-            if (attributes.HasFlag(MethodAttributes.Static))
+            if(access.IsStatic)
             {
                 result.Append("static ");
             }

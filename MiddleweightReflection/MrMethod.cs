@@ -90,6 +90,15 @@ namespace MiddleweightReflection
             return modifiers;
         }
 
+        /// <summary>
+        /// Same as GetParsedMethodAttributes but a more discoverable name
+        /// </summary>
+        /// <returns></returns>
+        public ParsedMethodAttributes GetMethodAccess()
+        {
+            return this.GetParsedMethodAttributes();
+        }
+
         private MrMethod(
             MethodDefinitionHandle methodDefinitionHandle,
             MrType declaringType)
