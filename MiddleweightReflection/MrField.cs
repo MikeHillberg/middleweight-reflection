@@ -6,9 +6,9 @@ using System.Reflection.Metadata;
 
 namespace MiddleweightReflection
 {
-    public class MrField
+    public class MrField : MrTypeAndMemberBase
     {
-        public MrType DeclaringType { get; }
+        override public MrType DeclaringType { get; }
         public FieldDefinitionHandle DefinitionHandle { get; }
         public FieldDefinition Definition { get; }
 
@@ -54,7 +54,7 @@ namespace MiddleweightReflection
             return this.Definition.DecodeSignature(this.DeclaringType.Assembly.TypeProvider, null);
         }
 
-        public string GetName()
+        override public string GetName()
         {
             return Definition.Name.AsString(DeclaringType.Assembly);
         }
@@ -136,7 +136,7 @@ namespace MiddleweightReflection
             }
         }
 
-        public ImmutableArray<MrCustomAttribute> GetCustomAttributes()
+        override public ImmutableArray<MrCustomAttribute> GetCustomAttributes()
         {
             var customAttributeHandles = this.Definition.GetCustomAttributes();
             var customAttributes = MrAssembly.GetCustomAttributesFromHandles(customAttributeHandles, this.DeclaringType);

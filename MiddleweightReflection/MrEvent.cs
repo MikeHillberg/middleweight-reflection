@@ -10,10 +10,10 @@ using System.Threading.Tasks;
 
 namespace MiddleweightReflection
 {
-    public class MrEvent
+    public class MrEvent : MrTypeAndMemberBase
     {
         public EventDefinitionHandle DefinitionHandle { get; }
-        public MrType DeclaringType { get; }
+        override public MrType DeclaringType { get; }
         public EventDefinition Definition { get; }
 
         private MrEvent(
@@ -25,6 +25,40 @@ namespace MiddleweightReflection
             Definition = eventDefinition;
             DeclaringType = declaringType;
         }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as MrEvent;
+            var prolog = MrLoadContext.OverrideEqualsProlog(this, other);
+            if (prolog != null)
+            {
+                return (bool)prolog;
+            }
+
+            if (this.DeclaringType != other.DeclaringType
+                || this.DefinitionHandle != other.DefinitionHandle)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool operator ==(MrEvent operand1, MrEvent operand2)
+        {
+            return MrLoadContext.OperatorEquals(operand1, operand2);
+        }
+
+        public static bool operator !=(MrEvent operand1, MrEvent operand2)
+        {
+            return !(operand1 == operand2);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.DefinitionHandle.GetHashCode();
+        }
+
 
         static internal MrEvent TryGetEvent(
             EventDefinitionHandle eventDefinitionHandle, 
@@ -86,7 +120,7 @@ namespace MiddleweightReflection
             }
         }
 
-        public ImmutableArray<MrCustomAttribute> GetCustomAttributes()
+        override public ImmutableArray<MrCustomAttribute> GetCustomAttributes()
         {
             var customAttributeHandles = this.Definition.GetCustomAttributes();
             var customAttributes = MrAssembly.GetCustomAttributesFromHandles(customAttributeHandles, this.DeclaringType);
@@ -100,9 +134,10 @@ namespace MiddleweightReflection
             return eventType;
         }
 
-        public string GetName()
+        override public string GetName()
         {
             return Definition.Name.AsString(DeclaringType.Assembly);
         }
+
     }
 }

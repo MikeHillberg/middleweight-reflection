@@ -16,8 +16,13 @@ namespace MiddleweightReflection
     /// <summary>
     /// Represents a type from an assembly (get this from an MRAssembly class)
     /// </summary>
-    public class MrType
+    public class MrType : MrTypeAndMemberBase
     {
+        //
+        // Following is the state of the class
+        // Any updates here should be matched in Clone and Equals
+        //
+
         internal TypeDefinitionHandle TypeDefinitionHandle { get; }
         internal TypeDefinition TypeDefinition { get; }
         public MrAssembly Assembly { get; }
@@ -39,6 +44,25 @@ namespace MiddleweightReflection
 
         public bool IsAssembly { get; private set; }
 
+        // If not null, this indicates that this type is a generic parameter, e.g. the T in List of T
+        public GenericParameterHandle? GenericParameterHandle { get; }
+
+        ImmutableArray<MrType> _typeArguments;
+
+        //
+        // End of state
+        //
+
+
+
+        public bool IsGenericParameter
+        {
+            get { return GenericParameterHandle != null; }
+        }
+
+
+        public override MrType DeclaringType => this;
+
         public TypeAttributes Attributes
         {
             get
@@ -55,13 +79,6 @@ namespace MiddleweightReflection
 
                 return TypeDefinition.Attributes;
             }
-        }
-
-        // If not null, this indicates that this type is a generic parameter, e.g. the T in List of T
-        public GenericParameterHandle? GenericParameterHandle { get; }
-        public bool IsGenericParameter
-        {
-            get { return GenericParameterHandle != null; }
         }
 
 
@@ -146,6 +163,65 @@ namespace MiddleweightReflection
             }
         }
 
+        public override bool Equals(object obj)
+        {
+            var other = obj as MrType;
+            var prolog = MrLoadContext.OverrideEqualsProlog(this, other);
+            if (prolog != null)
+            {
+                return (bool)prolog;
+            }
+
+            // Skip TypeDefinition because it doesn't support Equals, and it's generated from the
+            // TypeDefinitionHandle anyway
+            bool matches = 
+                this.Assembly == other.Assembly
+                && this.TypeCode == other.TypeCode
+                && this.IsTypeCode == other.IsTypeCode
+                && this.TypeDefinitionHandle == other.TypeDefinitionHandle
+                && this.GenericParameterHandle == other.GenericParameterHandle
+                && this._fakeName == other._fakeName
+                && this._fakeNamespace == other._fakeNamespace;
+                
+            if(!matches)
+            {
+                return false;
+            }
+
+            if (this._typeArguments != null)
+            {
+                if (other._typeArguments == null)
+                {
+                    return false;
+                }
+
+                for (int i = 0; i < _typeArguments.Length; i++)
+                {
+                    if (this._typeArguments[i] != other._typeArguments[i])
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        public static bool operator ==(MrType operand1, MrType operand2)
+        {
+            return MrLoadContext.OperatorEquals(operand1, operand2);
+        }
+
+        public static bool operator !=(MrType operand1, MrType operand2)
+        {
+            return !(operand1 == operand2);
+        }
+
+        public override int GetHashCode()
+        {
+            return TypeDefinitionHandle.GetHashCode();
+        }
+
         /// <summary>
         /// Create a primitive/fundamental type (int, float, string, etc)
         /// </summary>
@@ -177,6 +253,24 @@ namespace MiddleweightReflection
             GenericParameterHandle = handle;
         }
 
+        private MrType(string fakeFullName, MrAssembly assembly)
+        {
+            this.Assembly = assembly;
+
+            var index = fakeFullName.LastIndexOf('.');
+            if (index == -1)
+            {
+                _fakeName = fakeFullName;
+            }
+            else
+            {
+                _fakeNamespace = fakeFullName.Substring(0, index);
+                _fakeName = fakeFullName.Substring(index + 1);
+            }
+
+            Debug.WriteLine($"Faking {_fakeName}");
+        }
+
         /// <summary>
         /// Create a type from the type table.
         /// </summary>
@@ -202,24 +296,6 @@ namespace MiddleweightReflection
         static internal MrType CreateFakeType(string name, MrAssembly assembly)
         {
             return new MrType(name, assembly);
-        }
-
-        private MrType(string fakeFullName, MrAssembly assembly)
-        {
-            this.Assembly = assembly;
-
-            var index = fakeFullName.LastIndexOf('.');
-            if (index == -1)
-            {
-                _fakeName = fakeFullName;
-            }
-            else
-            {
-                _fakeNamespace = fakeFullName.Substring(0, index);
-                _fakeName = fakeFullName.Substring(index + 1);
-            }
-
-            Debug.WriteLine($"Faking {_fakeName}");
         }
 
         public bool IsFakeType => _fakeName != null;
@@ -307,7 +383,6 @@ namespace MiddleweightReflection
 
             _typeArguments = argsList.ToImmutableArray();
         }
-        ImmutableArray<MrType> _typeArguments;
 
         /// <summary>
         /// If this type is a generic parameter, this will be the type parameter name (e.g. "T" in List of T).
@@ -843,7 +918,7 @@ namespace MiddleweightReflection
         /// The raw name of the type. Use GetPrettyName to make generic types look better.
         /// </summary>
         /// <returns></returns>
-        public string GetName()
+        override public string GetName()
         {
             return GetName(prettyName: false);
         }
@@ -857,7 +932,7 @@ namespace MiddleweightReflection
             return GetName(prettyName: true);
         }
 
-        string GetName(bool prettyName = true)
+        string GetName(bool prettyName)
         {
             // String will typically require less allocations than StringBuilder
             string name;
@@ -1211,7 +1286,7 @@ namespace MiddleweightReflection
             }
         }
 
-        public ImmutableArray<MrCustomAttribute> GetCustomAttributes()
+        override public ImmutableArray<MrCustomAttribute> GetCustomAttributes()
         {
             if (IsTypeCode || IsFakeType || IsGenericParameter)
             {

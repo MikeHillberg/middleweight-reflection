@@ -12,9 +12,16 @@ namespace MiddleweightReflection
     /// <summary>
     /// Represents a method on the DeclaringType
     /// </summary>
-    public class MrMethod
+    public class MrMethod : MrTypeAndMemberBase
     {
-        public MrType DeclaringType { get; private set; }
+
+        MrType _declaringType;
+        override public MrType DeclaringType => _declaringType;
+        private void SetDeclaringType(MrType type)
+        {
+            _declaringType = type;
+        }
+
         public MethodDefinitionHandle MethodDefinitionHandle { get; private set; }
         public MethodDefinition MethodDefinition { get; private set; }
         public MethodSignature<MrType> MethodSignature { get; private set; }
@@ -23,6 +30,9 @@ namespace MiddleweightReflection
         {
             return $"MrMethod: {DeclaringType.GetPrettyName()}.{GetName()}";
         }
+
+
+
 
         static internal bool IsPublicMethodAttributes(MethodAttributes attributes)
         {
@@ -150,7 +160,7 @@ namespace MiddleweightReflection
             MrType declaringType,
             MethodDefinition methodDefinition)
         {
-            DeclaringType = declaringType;
+            SetDeclaringType(declaringType);
             MethodDefinitionHandle = methodDefinitionHandle;
 
             MethodDefinition = methodDefinition;
@@ -170,12 +180,46 @@ namespace MiddleweightReflection
                 context);
         }
 
+        public override bool Equals(object obj)
+        {
+            var other = obj as MrMethod;
+            var prolog = MrLoadContext.OverrideEqualsProlog(this, other);
+            if (prolog != null)
+            {
+                return (bool)prolog;
+            }
+
+            if( this.DeclaringType != other.DeclaringType
+                || this.MethodDefinitionHandle != other.MethodDefinitionHandle )
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool operator ==(MrMethod operand1, MrMethod operand2)
+        {
+            return MrLoadContext.OperatorEquals(operand1, operand2);
+        }
+
+        public static bool operator !=(MrMethod operand1, MrMethod operand2)
+        {
+            return !(operand1 == operand2);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.MethodDefinitionHandle.GetHashCode();
+        }
+
+
         public bool GetIsConstructor()
         {
             return MethodDefinition.Name.AsString(DeclaringType.Assembly) == ".ctor";
         }
 
-        public string GetName()
+        override public string GetName()
         {
             return MethodDefinition.Name.AsString(DeclaringType.Assembly);
         }
@@ -218,7 +262,7 @@ namespace MiddleweightReflection
         /// <summary>
         /// This method's custom attributes, empty if none
         /// </summary>
-        public ImmutableArray<MrCustomAttribute> GetCustomAttributes()
+        override public ImmutableArray<MrCustomAttribute> GetCustomAttributes()
         {
             var customAttributeHandles = this.MethodDefinition.GetCustomAttributes();
             var customAttributes = MrAssembly.GetCustomAttributesFromHandles(customAttributeHandles, this.DeclaringType);

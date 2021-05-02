@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -22,6 +23,12 @@ namespace MRUnitTests
         [TestMethod]
         public void TestDotNetAssembly()
         {
+            var loadContext = LoadDotNetTestAssembly();
+            TestMethodHelper(loadContext, Properties.Resources.ExpectedOutput);
+        }
+
+        MrLoadContext LoadDotNetTestAssembly()
+        {
             var testAssembly = typeof(UnitTestSampleAssembly.Class1<,,>).Assembly;
 
             var loadContext = new MrLoadContext();
@@ -38,7 +45,7 @@ namespace MRUnitTests
             loadContext.LoadFromAssemblyName(testAssembly.GetName().Name);
             loadContext.FinishLoading();
 
-            TestMethodHelper(loadContext, Properties.Resources.ExpectedOutput);
+            return loadContext;
         }
 
         // Load a WinMD from memory
@@ -57,6 +64,47 @@ namespace MRUnitTests
 
             TestMethodHelper(loadContext, Properties.Resources.ExpectedUnprojectedWinRT);
         }
+
+
+        [TestMethod]
+        public void TestEquals()
+        {
+            var loadContext = LoadDotNetTestAssembly();
+
+            // Get the Class1<,,> type from the assembly
+            loadContext.TryFindMrType("UnitTestSampleAssembly.Class1`3", out var mrType);
+
+            // Get a closed version of Class1 from the assembly by finding the 'ClosedSelf' property and getting its return type
+            var nameofMember = nameof(UnitTestSampleAssembly.Class1<Stream, object, object>.ClosedSelf);
+            var prop = mrType.GetProperties().First((p) => p.GetName() == nameofMember);
+            var mrType1 = prop.GetPropertyType();
+
+            // Get that closed version of Class1 again. Because of the way SRM works, this will be a new instance of the MRType
+            prop = mrType.GetProperties().First((p) => p.GetName() == nameofMember);
+            var mrType2 = prop.GetPropertyType();
+            Assert.IsFalse(object.ReferenceEquals(mrType1, mrType2));
+            Assert.IsTrue(mrType1 == mrType2 && mrType1.Equals(mrType2) && !(mrType1 != mrType2) && mrType1.GetHashCode() == mrType2.GetHashCode());
+
+
+            var prop1 = mrType1.GetProperties()[0];
+            var prop2 = mrType2.GetProperties()[0];
+            Assert.IsTrue(prop1 == prop2 && prop1.Equals(prop2) && !(prop1 != prop2) && prop1.GetHashCode() == prop2.GetHashCode());
+
+            mrType1.GetMethodsAndConstructors(out var methods1, out var constructors1);
+            mrType2.GetMethodsAndConstructors(out var methods2, out var constructors2);
+            var method1 = methods1[0];
+            var method2 = methods2[0];
+            Assert.IsTrue(method1 == method2 && method1.Equals(method2) && !(method1 != method2) && method1.GetHashCode() == method2.GetHashCode());
+
+            var parameter1 = method1.GetParameters()[0];
+            var parameter2 = method2.GetParameters()[0];
+            Assert.IsTrue(parameter1 == parameter2 && parameter1.Equals(parameter2) && !(parameter1 != parameter2) && parameter1.GetHashCode() == parameter2.GetHashCode());
+
+            var event1 = mrType1.GetEvents()[0];
+            var event2 = mrType2.GetEvents()[0];
+            Assert.IsTrue(event1 == event2 && event1.Equals(event2) && !(event1 != event2) && event1.GetHashCode() == event2.GetHashCode() && event1.GetHashCode() == event2.GetHashCode());
+        }
+
 
         public void TestMethodHelper(MrLoadContext loadContext, string expectedOutput)
         {

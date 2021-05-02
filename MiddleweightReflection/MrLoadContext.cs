@@ -56,11 +56,14 @@ namespace MiddleweightReflection
 
             // All the assemblies need to be loaded before they're initialized. That way we know how 
             // to resolve assembly references.
-            foreach (var assembly in _loadedAssemblies.Values.Union(_implicitAssemblies.Values))
-            {
-                assembly.Initialize();
-            }
+            // Note that _assembliesToInitialize can change as we iterate through this loop,
+            // because new fake assemblies might get generated. So use a for loop rather 
+            // than a foreach iterator.
 
+            for(int i = 0; i < _assembliesToInitialize.Count ; i++)
+            {
+                _assembliesToInitialize[i].Initialize();
+            }
         }
 
         public delegate string AssemblyPathFromNameCallback(string assemblyName);
@@ -251,7 +254,7 @@ namespace MiddleweightReflection
             }
             else
             {
-                Debug.Assert(name == reader.GetString(reader.GetAssemblyDefinition().Name));
+                Debug.Assert(name == reader.GetString(reader.GetAssemblyDefinition().Name) || name == "mscorlib");
 
                 // See if the assembly was already explicitly loaded
                 if (_loadedAssemblies.TryGetValue(name, out var loadedAssembly))
@@ -294,8 +297,13 @@ namespace MiddleweightReflection
                 _loadedAssemblies[name] = newAssembly;
             }
 
+            // Remember to initialize this assembly in FinishLoading()
+            _assembliesToInitialize.Add(newAssembly);
+
             return newAssembly;
         }
+
+        List<MrAssembly> _assembliesToInitialize = new List<MrAssembly>();
 
 
         /// <summary>
@@ -335,7 +343,7 @@ namespace MiddleweightReflection
 
             // Validate that the name of the assembly is what it's supposed to be
             var name = reader.GetString(reader.GetAssemblyDefinition().Name);
-            if (name != requestedName)
+            if (name != requestedName && requestedName != "mscorlib")
             {
                 throw new Exception($"Expected assembly name '{requestedName}', actual is '{name}'");
             }
@@ -433,6 +441,34 @@ namespace MiddleweightReflection
                 FakeTypeRequired(this, args);
                 type = args.ReplacementType;
             }
+        }
+
+        // Common implementation of operator==
+        static internal bool OperatorEquals<T>(T op1, T op2) where T : class
+        {
+            if (op1 == null)
+            {
+                return op2 == null;
+            }
+
+            return op1.Equals(op2);
+        }
+
+        // Common code for the start of every Equals override method
+        static internal bool? OverrideEqualsProlog<T>(T op1, T op2) where T : class
+        {
+            // Optimization: if they're equal, they'll often be the same instance
+            if (Object.ReferenceEquals(op1, op2))
+            {
+                return true;
+            }
+
+            if (op2 == null)
+            {
+                return false;
+            }
+
+            return null;
         }
 
 

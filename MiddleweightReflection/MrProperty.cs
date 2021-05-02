@@ -12,9 +12,9 @@ namespace MiddleweightReflection
     /// <summary>
     /// A property of an MRType
     /// </summary>
-    public class MrProperty
+    public class MrProperty : MrTypeAndMemberBase
     {
-        public MrType DeclaringType { get; }
+        override public MrType DeclaringType { get; }
         public PropertyDefinitionHandle DefinitionHandle { get; }
         public PropertyDefinition Definition { get; }
 
@@ -30,6 +30,7 @@ namespace MiddleweightReflection
             DefinitionHandle = propertyDefinitionHandle;
             Definition = propertyDefinition;
         }
+
 
         internal static MrProperty TryGetProperty(
             MrType declaringType, 
@@ -83,6 +84,36 @@ namespace MiddleweightReflection
             return $"MrProperty: {DeclaringType.GetName()}.{GetName()}";
         }
 
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as MrProperty;
+            var prolog = MrLoadContext.OverrideEqualsProlog(this, other);
+            if (prolog != null)
+            {
+                return (bool)prolog;
+            }
+
+            return this.DeclaringType == other.DeclaringType
+                && this.DefinitionHandle == other.DefinitionHandle;
+        }
+
+        public static bool operator ==(MrProperty operand1, MrProperty operand2)
+        {
+            return MrLoadContext.OperatorEquals(operand1, operand2);
+        }
+
+        public static bool operator !=(MrProperty operand1, MrProperty operand2)
+        {
+            return !(operand1 == operand2);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.DefinitionHandle.GetHashCode();
+        }
+
+
         /// <summary>
         /// The property's getter and setter, either of which could be null
         /// </summary>
@@ -98,7 +129,7 @@ namespace MiddleweightReflection
             setter = MrMethod.TryGetMethod(propertyAccessors.Setter, declaringType, publicishOnly);
         }
 
-        public ImmutableArray<MrCustomAttribute> GetCustomAttributes()
+        override public ImmutableArray<MrCustomAttribute> GetCustomAttributes()
         {
             var customAttributeHandles = this.Definition.GetCustomAttributes();
             var customAttributes = MrAssembly.GetCustomAttributesFromHandles(customAttributeHandles, this.DeclaringType);
@@ -160,7 +191,7 @@ namespace MiddleweightReflection
             return propertySignature.ReturnType;
         }
 
-        public string GetName()
+        override public string GetName()
         {
             return Definition.Name.AsString(DeclaringType.Assembly);
         }

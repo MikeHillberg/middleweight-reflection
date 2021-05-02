@@ -27,11 +27,6 @@ namespace MiddleweightReflection
             return $"MRAssembly: {(string.IsNullOrEmpty(this.Name) ? this.Location : this.Name)}";
         }
 
-        MrAssembly(MrLoadContext loadContext)
-        {
-            _loadContext = loadContext;
-        }
-
         private MrAssembly(MetadataReader reader, string location, MrLoadContext loadContext)
         {
             this.Location = location;
@@ -45,7 +40,7 @@ namespace MiddleweightReflection
             return mrAssembly;
         }
 
-        // This has to be called after the LoadContext has loaded all the assemblies,
+        // This must be called after the LoadContext has loaded all the assemblies,
         // so that we know which referent types have to be faked.
         internal void Initialize()
         {
@@ -71,7 +66,7 @@ namespace MiddleweightReflection
 
         internal static MrAssembly CreateFakeAssembly(string name, MrLoadContext loadContext)
         {
-            var mrAssembly = new MrAssembly(loadContext);
+            var mrAssembly = new MrAssembly(null, null, loadContext);
             mrAssembly.IsFakeAssembly = true;
             mrAssembly.Name = name;
             return mrAssembly;
@@ -282,6 +277,33 @@ namespace MiddleweightReflection
             }
 
             return customAttributes;
+        }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as MrAssembly;
+            var prolog = MrLoadContext.OverrideEqualsProlog(this, other);
+            if (prolog != null)
+            {
+                return (bool)prolog;
+            }
+
+            return this.Reader == other.Reader;
+        }
+
+        public static bool operator ==(MrAssembly operand1, MrAssembly operand2)
+        {
+            return MrLoadContext.OperatorEquals(operand1, operand2);
+        }
+
+        public static bool operator !=(MrAssembly operand1, MrAssembly operand2)
+        {
+            return !(operand1 == operand2);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Reader.GetHashCode();
         }
     }
 
