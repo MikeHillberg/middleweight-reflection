@@ -1,5 +1,5 @@
 ﻿
-class <Module>
+internal class <Module>
     NotPublic
 
 public class UnitTestSampleAssembly.Class1<T1,T2,T3> : System.Object
@@ -47,11 +47,11 @@ public interface UnitTestSampleAssembly.IPublicInterface
     AutoLayout, AnsiClass, Class, Public, ClassSemanticsMask, Abstract
     public System.String PublicInterfaceStringMethod()
 
-interface UnitTestSampleAssembly.IInternalInterface
+internal interface UnitTestSampleAssembly.IInternalInterface
     AutoLayout, AnsiClass, Class, ClassSemanticsMask, Abstract
     public System.String InternalInterfaceStringMethod()
 
-struct UnitTestSampleAssembly.Struct1 : System.ValueType
+internal struct UnitTestSampleAssembly.Struct1 : System.ValueType
     AutoLayout, AnsiClass, Class, SequentialLayout, Sealed, BeforeFieldInit
     public System.Int32 PublicIntMethod0()
     System.Int32 PublicIntField;

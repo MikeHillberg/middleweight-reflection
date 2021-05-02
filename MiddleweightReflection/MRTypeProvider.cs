@@ -30,13 +30,11 @@ namespace MiddleweightReflection
         {
             TypeDefinition definition = reader.GetTypeDefinition(handle);
 
-            string name = definition.Namespace.IsNil
-                ? reader.GetString(definition.Name)
-                : reader.GetString(definition.Namespace) + "." + reader.GetString(definition.Name);
-
-            // bugbug
             if (definition.IsNested)
             {
+                // bugbug: For some reason, for nested types, the caller seems to expect
+                // the outer type.
+
                 TypeDefinitionHandle declaringTypeHandle = definition.GetDeclaringType();
                 return GetTypeFromDefinition(reader, declaringTypeHandle, 0);  // + "/" + name;
             }

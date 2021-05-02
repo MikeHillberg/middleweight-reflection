@@ -529,7 +529,7 @@ namespace MiddleweightReflection
 
                 var attributes = TypeDefinition.Attributes & TypeAttributes.VisibilityMask;
                 return
-                    !attributes.HasFlag(TypeAttributes.Public) && !attributes.HasFlag(TypeAttributes.NotPublic)
+                    !attributes.HasFlag(TypeAttributes.Public) && !IsNestedType
                     || attributes == TypeAttributes.NestedAssembly // Internal
                     || attributes == TypeAttributes.NestedFamORAssem; // protected internal
             }
