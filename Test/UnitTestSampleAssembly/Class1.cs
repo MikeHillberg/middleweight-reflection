@@ -15,6 +15,7 @@ namespace UnitTestSampleAssembly
         where T1 : Stream
         where T3 : class
     {
+        // This doesn't show up in the metadata
         static Class1() { return; }
 
         [TestAttribute]
@@ -48,7 +49,7 @@ namespace UnitTestSampleAssembly
         : Class1<T1, string, string>, IPublicInterface
         where T1 : Stream
     {
-        protected Class2() { }
+        protected Class2()  { }
 
         public string PublicInterfaceStringMethod() { throw new NotImplementedException(); }
 
@@ -64,11 +65,39 @@ namespace UnitTestSampleAssembly
         protected override void ProtectedVirtualVoidMethod0() { base.ProtectedVirtualVoidMethod0(); }
         protected override void ProtectedAbstractVoidMethod0() { return; }
         internal override void InternalVirtualVoidMethod0() { base.InternalVirtualVoidMethod0(); }
+        protected internal void ProtectedInternalMethod() { }
     }
 
     [Obsolete("Test attribute")]
-    class Class3 : Class2<Stream>
+    public class Class3 : Class2<Stream>
     {
+        public class NestedInClass3
+        {
+            internal NestedInClass3() { }
+            internal int InternalProp { get; }
+            private int PrivateField;
+            internal void InternalMethod() { return; }
+            private event EventHandler PrivateEvent;
+            public int PropertyWithDifferentAccessors { get; private set; }
+        }
+
+        public NestedInClass3 PropOfNestedType { get; }
+
+        private class PrivateNestedInClass3
+        {
+        }
+
+        protected class ProtectedNestedInClass3
+        {
+        }
+        internal class InternalNestedInClass3
+        {
+        }
+
+
+        protected internal class ProtectedInternalNestedInClass3
+        {
+        }
     }
 
     public class ExplicitInterfacesClass : IPublicInterface, IInternalInterface

@@ -34,7 +34,9 @@ namespace MiddleweightReflection
         public bool IsTypeCode { get; private set; }
         public PrimitiveTypeCode TypeCode { get; }
 
-        public bool IsArray { get; private set; }
+        public bool IsArray => ArrayRank != 0;
+
+        public int ArrayRank { get; private set; } = 0; 
 
         public bool IsPointer { get; private set; }
         public bool IsReference { get; private set; }
@@ -83,13 +85,13 @@ namespace MiddleweightReflection
         internal static MrType CreateFromGenericParameterHandle(
             GenericParameterHandle handle,
             MrAssembly assembly,
-            bool isArray = false,
+            int arrayRank = 0,
             bool isReference = false,
             bool isPointer = false)
         {
             return new MrType(handle, assembly)
             {
-                IsArray = isArray,
+                ArrayRank = arrayRank,
                 IsReference = isReference,
                 IsPointer = isPointer
             };
@@ -98,17 +100,17 @@ namespace MiddleweightReflection
         // Create a new type from an old type, but modified to be an array/reference/pointer/const
         internal static MrType Clone(
             MrType other,
-            bool? isArrayOverride = null,
+            int? arrayRankOverride = null,
             bool? isReferenceOverride = null,
             bool? isPointerOverride = null,
             bool? isConstOverride = null)
         {
-            return new MrType(other, isArrayOverride, isReferenceOverride, isPointerOverride, isConstOverride);
+            return new MrType(other, arrayRankOverride, isReferenceOverride, isPointerOverride, isConstOverride);
         }
 
         private MrType(
             MrType other,
-            bool? isArrayOverride = null,
+            int? arrayRankOverride = null,
             bool? isReferenceOverride = null,
             bool? isPointerOverride = null,
             bool? isConstOverride = null)
@@ -151,13 +153,13 @@ namespace MiddleweightReflection
                 IsReference = (bool)isReferenceOverride;
             }
 
-            if (isArrayOverride == null)
+            if (arrayRankOverride == null)
             {
-                IsArray = other.IsArray;
+                ArrayRank = other.ArrayRank;
             }
             else
             {
-                IsArray = (bool)isArrayOverride;
+                ArrayRank = (int)arrayRankOverride;
             }
         }
 
@@ -572,7 +574,8 @@ namespace MiddleweightReflection
                 }
 
                 // TypeAttributes doesn't look like a bit mask, but it is, so you can't just check for Public
-                return (TypeDefinition.Attributes & TypeAttributes.VisibilityMask) == TypeAttributes.Public;
+                var maskedAttributes = TypeDefinition.Attributes & TypeAttributes.VisibilityMask;
+                return maskedAttributes == TypeAttributes.Public || maskedAttributes == TypeAttributes.NestedPublic;
             }
         }
 
@@ -599,11 +602,47 @@ namespace MiddleweightReflection
                     return false;
                 }
 
-                var attributes = TypeDefinition.Attributes;
-                return !attributes.HasFlag(TypeAttributes.Public) && !attributes.HasFlag(TypeAttributes.NotPublic);
+                var attributes = TypeDefinition.Attributes & TypeAttributes.VisibilityMask;
+                return
+                    !attributes.HasFlag(TypeAttributes.Public) && !IsNestedType
+                    || attributes == TypeAttributes.NestedAssembly // Internal
+                    || attributes == TypeAttributes.NestedFamORAssem; // protected internal
             }
         }
 
+        public bool IsPrivate
+        {
+            get
+            {
+                if (IsTypeCode || IsFakeType)
+                {
+                    return false;
+                }
+
+                return
+                    (TypeDefinition.Attributes & TypeAttributes.VisibilityMask)
+                    == TypeAttributes.NestedPrivate;
+            }
+        }
+
+
+        public bool IsProtected
+        {
+            get
+            {
+                if (IsTypeCode || IsFakeType)
+                {
+                    return false;
+                }
+
+                var attributes = TypeDefinition.Attributes & TypeAttributes.VisibilityMask;
+
+                return
+                    attributes == TypeAttributes.NestedFamily
+                    || attributes == TypeAttributes.NestedFamORAssem;
+
+            }
+        }
 
         public bool IsStatic
         {
@@ -954,11 +993,18 @@ namespace MiddleweightReflection
         /// </summary>
         internal static string GetUnmodifiedTypeName(
             string name,
-            out bool isArray,
+            out int? arrayRank,
             out bool isReference,
             out bool isPointer)
         {
-            isArray = name.Contains("[");
+
+            arrayRank = null;
+            if(name.Contains("["))
+            {
+                // [] is a rank of 1, [,] is a rank of 2, etc.
+                arrayRank = name.Split(',').Length;
+            }
+
             isReference = name.Contains("&");
             isPointer = name.Contains("*");
 
@@ -1001,6 +1047,8 @@ namespace MiddleweightReflection
 
                 var isConstructor = mrMethod.GetIsConstructor();
 
+                // Ignore things like the get_/set_ methods for properties.
+                // Don't ignore constructors though; SpecialName is set for the static constructor
                 if (mrMethod.MethodDefinition.Attributes.HasFlag(MethodAttributes.SpecialName) && !isConstructor)
                 {
                     continue;
@@ -1058,6 +1106,24 @@ namespace MiddleweightReflection
             return propertiesList == null ? ImmutableArray<MrProperty>.Empty : propertiesList.ToImmutableArray();
         }
 
+        public ImmutableArray<MrType> GetNestedTypes()
+        {
+            List<MrType> mrTypeList = null;
+            var nestedTypeDefinitionHandles = this.TypeDefinition.GetNestedTypes();
+            foreach(var nestedTypeDefinition in nestedTypeDefinitionHandles)
+            {
+                if(mrTypeList == null)
+                {
+                    mrTypeList = new List<MrType>();
+                }
+                mrTypeList.Add(MrType.CreateFromTypeDefinition(nestedTypeDefinition, this.Assembly));
+            }
+
+            return mrTypeList == null ? ImmutableArray<MrType>.Empty : mrTypeList.ToImmutableArray();
+        }
+
+        public bool IsNestedType => this.TypeDefinition.IsNested;
+
         /// <summary>
         /// Get events tfor this type
         /// </summary>
@@ -1112,10 +1178,18 @@ namespace MiddleweightReflection
 
                 // For a property named Foo, the compiler may generate a private field named
                 // <Foo>k__BackingField
-                if (field.GetName().EndsWith(">k__BackingField"))
+                if (field.IsPrivate && field.GetName().EndsWith(">k__BackingField"))
                 {
                     continue;
                 }
+
+                // Bugbug: For an event named FooHappened, the compiler generates a private field named
+                // FooHappened. How to filter this out? If you're only looking for public types and the
+                // event is public, it's not an issue. But if you're also looking non-public types,
+                // you'll see FooHappened as both an event and a field. There doesn't seem to be any
+                // kind of marking in the metadata to indicate that the field is special.
+                // I think maybe you need to check to see if there's an event and field by the same
+                // name, but I hate to take that overhead on every field lookup.
 
                 if (fieldsList == null)
                 {
@@ -1133,6 +1207,11 @@ namespace MiddleweightReflection
             var typeNameBuilder = new StringBuilder();
             if (typeDefinition.IsNested)
             {
+                // This is a nested type, like B nested in A, so we want to produce the name
+                // "A+B". GetDeclaryingType() will return A, so we'll start "A+", and then below
+                // (after the 'if' block) we'll add the "B". Note that this is recursing because we 
+                // could be a nested type inside a nested type.
+
                 var declaringTypeDefinitionHandle = typeDefinition.GetDeclaringType();
                 var declaringTypeDefinition = reader.GetTypeDefinition(declaringTypeDefinitionHandle);
                 typeNameBuilder.Append(GetTypeNameFromTypeDefinition(reader, declaringTypeDefinition));

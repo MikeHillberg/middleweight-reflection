@@ -1,17 +1,16 @@
 ﻿
-class <Module>
+internal class <Module>
     NotPublic
 
 public class UnitTestSampleAssembly.Class1<T1,T2,T3> : System.Object
     AutoLayout, AnsiClass, Class, Public, Abstract
     [DefaultMemberAttribute(Item)]
-    UnitTestSampleAssembly.Class1<T1,T2,T3>()
-    T1 PublicT1WriteableProperty { get; set; }
-    System.Int32 this.[System.Int32]
-    UnitTestSampleAssembly.Class1<T1,T2,T3> Self { get; }
-    UnitTestSampleAssembly.Class1<System.IO.Stream,System.Int32,System.Object> ClosedSelf { get; }
-    System.EventHandler<System.EventArgs> PublicEvent { add; remove; }
-    static System.String StaticPublicStringMethod2(System.String arg1, System.Int32 arg2)
+    protected Class1<T1,T2,T3>()
+    T1 PublicT1WriteableProperty { public get; public set; }
+    public System.Int32 this.[System.Int32]
+    UnitTestSampleAssembly.Class1<T1,T2,T3> Self { public get; }
+    public System.EventHandler<System.EventArgs> PublicEvent { add; remove; }
+    public static System.String StaticPublicStringMethod2(System.String arg1, System.Int32 arg2)
     protected System.Void ProtectedVirtualVoidMethod0()
     protected System.Void ProtectedAbstractVoidMethod0()
     System.Int32 PublicIntField;
@@ -19,36 +18,42 @@ public class UnitTestSampleAssembly.Class1<T1,T2,T3> : System.Object
 public class UnitTestSampleAssembly.Class2<T1> : UnitTestSampleAssembly.Class1<T1,System.String,System.String>
     AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
     UnitTestSampleAssembly.IPublicInterface
-    UnitTestSampleAssembly.Class2<T1>()
-    System.Collections.Generic.List<System.String> PublicListOfStringProperty { get; }
-    System.String PublicInterfaceStringMethod()
-    System.String PublicStringAttributeMethod0()
-    UnitTestSampleAssembly.Class1<System.IO.Stream,T1,System.String> PartiallyClosedTypeMethod()
+    protected Class2<T1>()
+    System.Collections.Generic.List<System.String> PublicListOfStringProperty { public get; }
+    public System.String PublicInterfaceStringMethod()
+    public System.String PublicStringAttributeMethod0()
+    public UnitTestSampleAssembly.Class1<System.IO.Stream,T1,System.String> PartiallyClosedTypeMethod()
     protected System.Void ProtectedVirtualVoidMethod0()
     protected System.Void ProtectedAbstractVoidMethod0()
 
-class UnitTestSampleAssembly.Class3 : UnitTestSampleAssembly.Class2<System.IO.Stream>
-    AutoLayout, AnsiClass, Class, BeforeFieldInit
+public class UnitTestSampleAssembly.Class3 : UnitTestSampleAssembly.Class2<System.IO.Stream>
+    AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
     [ObsoleteAttribute(Test attribute)]
-    UnitTestSampleAssembly.Class3()
+    nested Class3+NestedInClass3
+    nested Class3+PrivateNestedInClass3
+    nested Class3+ProtectedNestedInClass3
+    nested Class3+InternalNestedInClass3
+    nested Class3+ProtectedInternalNestedInClass3
+    public Class3()
+    UnitTestSampleAssembly.Class3 PropOfNestedType { public get; }
 
 public class UnitTestSampleAssembly.ExplicitInterfacesClass : System.Object
     AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
     UnitTestSampleAssembly.IPublicInterface
     UnitTestSampleAssembly.IInternalInterface
-    UnitTestSampleAssembly.ExplicitInterfacesClass()
+    public ExplicitInterfacesClass()
 
 public interface UnitTestSampleAssembly.IPublicInterface
     AutoLayout, AnsiClass, Class, Public, ClassSemanticsMask, Abstract
-    System.String PublicInterfaceStringMethod()
+    public System.String PublicInterfaceStringMethod()
 
-interface UnitTestSampleAssembly.IInternalInterface
+internal interface UnitTestSampleAssembly.IInternalInterface
     AutoLayout, AnsiClass, Class, ClassSemanticsMask, Abstract
-    System.String InternalInterfaceStringMethod()
+    public System.String InternalInterfaceStringMethod()
 
-struct UnitTestSampleAssembly.Struct1 : System.ValueType
+internal struct UnitTestSampleAssembly.Struct1 : System.ValueType
     AutoLayout, AnsiClass, Class, SequentialLayout, Sealed, BeforeFieldInit
-    System.Int32 PublicIntMethod0()
+    public System.Int32 PublicIntMethod0()
     System.Int32 PublicIntField;
     System.Double PublicDoubleField;
 
@@ -71,4 +76,33 @@ public enum UnitTestSampleAssembly.FlagsEnum : System.Enum
 public class UnitTestSampleAssembly.TestAttribute : System.Attribute
     AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
     [AttributeUsageAttribute(32767)]
-    UnitTestSampleAssembly.TestAttribute()
+    public TestAttribute()
+
+public class Class3+NestedInClass3 : System.Object (nested)
+    AutoLayout, AnsiClass, Class, NestedPublic, BeforeFieldInit
+    System.Int32 PropertyWithDifferentAccessors { public get; }
+
+public class Class3+NestedInClass3 : System.Object (nested)
+    AutoLayout, AnsiClass, Class, NestedPublic, BeforeFieldInit
+    internal NestedInClass3()
+    System.Int32 InternalProp { internal get; }
+    System.Int32 PropertyWithDifferentAccessors { public get; private set; }
+    private System.EventHandler PrivateEvent { add; remove; }
+    internal System.Void InternalMethod()
+    System.Int32 PrivateField;
+
+private class Class3+PrivateNestedInClass3 : System.Object (nested)
+    AutoLayout, AnsiClass, Class, NestedPrivate, BeforeFieldInit
+    public PrivateNestedInClass3()
+
+protected class Class3+ProtectedNestedInClass3 : System.Object (nested)
+    AutoLayout, AnsiClass, Class, NestedFamily, BeforeFieldInit
+    public ProtectedNestedInClass3()
+
+internal class Class3+InternalNestedInClass3 : System.Object (nested)
+    AutoLayout, AnsiClass, Class, NestedAssembly, BeforeFieldInit
+    public InternalNestedInClass3()
+
+internal protected class Class3+ProtectedInternalNestedInClass3 : System.Object (nested)
+    AutoLayout, AnsiClass, Class, VisibilityMask, BeforeFieldInit
+    public ProtectedInternalNestedInClass3()

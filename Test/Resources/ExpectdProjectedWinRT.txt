@@ -1,5 +1,5 @@
 ﻿
-class <Module>
+internal class <Module>
     NotPublic
 
 public class UnitTestWinRTComponent.WinRTComponent : System.Object
@@ -9,10 +9,10 @@ public class UnitTestWinRTComponent.WinRTComponent : System.Object
     [VersionAttribute(16777216)]
     [ActivatableAttribute(16777216)]
     UnitTestWinRTComponent.IWinRTComponentClass
-    UnitTestWinRTComponent.WinRTComponent()
-    System.Collections.Generic.IList<System.String> StringList { get; set; }
+    public WinRTComponent()
+    System.Collections.Generic.IList<System.String> StringList { public get; public set; }
 
-class UnitTestWinRTComponent.<WinRT>WinRTComponent : System.Object
+internal class UnitTestWinRTComponent.<WinRT>WinRTComponent : System.Object
     AutoLayout, AnsiClass, Class, Sealed, Import, WindowsRuntime, BeforeFieldInit
     [MarshalingBehaviorAttribute]
     [ThreadingAttribute]
@@ -21,13 +21,13 @@ class UnitTestWinRTComponent.<WinRT>WinRTComponent : System.Object
     [ActivatableAttribute(16777216)]
     UnitTestWinRTComponent.IWinRTComponentClass
     Windows.Foundation.IStringable
-    UnitTestWinRTComponent.<WinRT>WinRTComponent()
-    System.Collections.Generic.IList<System.String> StringList { get; set; }
+    public <WinRT>WinRTComponent()
+    System.Collections.Generic.IList<System.String> StringList { public get; public set; }
 
-interface UnitTestWinRTComponent.IWinRTComponentClass
+internal interface UnitTestWinRTComponent.IWinRTComponentClass
     AutoLayout, AnsiClass, Class, ClassSemanticsMask, Abstract, WindowsRuntime
     [CompilerGeneratedAttribute]
     [GuidAttribute(595258099, 43547, 21940, 123, 11, 53, 220, 245, 117, 190, 210)]
     [VersionAttribute(16777216)]
     [ExclusiveToAttribute(UnitTestWinRTComponent.WinRTComponent)]
-    System.Collections.Generic.IList<System.String> StringList { get; set; }
+    System.Collections.Generic.IList<System.String> StringList { public get; public set; }

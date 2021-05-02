@@ -87,6 +87,12 @@ namespace MiddleweightReflection
                 case ConstantTypeCode.UInt32:
                     return (int)blobReader.ReadUInt32();
 
+                case ConstantTypeCode.UInt64:
+                    return (int)blobReader.ReadUInt64();
+
+                case ConstantTypeCode.Int64:
+                    return (int)blobReader.ReadInt64();
+
                 case ConstantTypeCode.UInt16:
                     return (int)blobReader.ReadUInt16();
 
