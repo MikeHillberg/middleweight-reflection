@@ -64,7 +64,6 @@ namespace MiddleweightReflection
             {
                 _assembliesToInitialize[i].Initialize();
             }
-
         }
 
         public delegate string AssemblyPathFromNameCallback(string assemblyName);
