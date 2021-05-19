@@ -143,7 +143,18 @@ namespace MiddleweightReflection
             {
                 var mrType = MrType.CreateFromTypeDefinition(typeDefinitionHandle, this);
                 _nameToMrType[mrType.GetFullName()] = mrType;
+
+                var nm = mrType.GetFullName();
+                if(nm.Contains("TD"))
+                {
+                    Debug.WriteLine($"nm: {nm}");
+                }
+
             }
+
+            // Windows.Win32.Debug.CONTEXT____1
+
+
         }
 
 
@@ -303,7 +314,14 @@ namespace MiddleweightReflection
 
         public override int GetHashCode()
         {
-            return this.Reader.GetHashCode();
+            if (this.Reader != null)
+            {
+                return this.Reader.GetHashCode();
+            }
+            else
+            {
+                return this.Name.GetHashCode();
+            }
         }
     }
 
