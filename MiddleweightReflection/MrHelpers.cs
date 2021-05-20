@@ -10,11 +10,19 @@ namespace MiddleweightReflection
     internal static class MrHelpers
     {
         /// <summary>
-        /// Converts a StringHandle to a String
+        /// Converts a StringHandle to a String, given an assembly
         /// </summary>
         internal static string AsString(this StringHandle stringHandle, MrAssembly assembly )
         {
-            return assembly.Reader.GetString(stringHandle);
+            return stringHandle.AsString(assembly.Reader);
+        }
+
+        /// <summary>
+        /// Converts a StringHandle to a String, given a metadata reader
+        /// </summary>
+        internal static string AsString(this StringHandle stringHandle, MetadataReader reader)
+        {
+            return reader.GetString(stringHandle);
         }
 
         /// <summary>

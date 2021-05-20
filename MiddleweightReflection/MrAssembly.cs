@@ -17,7 +17,7 @@ namespace MiddleweightReflection
     {
         public string Name { get; private set; }
         MrLoadContext _loadContext;
-        public MrLoadContext LoadContext { get { return _loadContext; }  }
+        public MrLoadContext LoadContext { get { return _loadContext; } }
 
         internal DisassemblingTypeProvider TypeProvider { get; private set; }
         public bool IsFakeAssembly;
@@ -44,7 +44,7 @@ namespace MiddleweightReflection
         // so that we know which referent types have to be faked.
         internal void Initialize()
         {
-            if(IsFakeAssembly)
+            if (IsFakeAssembly)
             {
                 return;
             }
@@ -57,7 +57,7 @@ namespace MiddleweightReflection
                 var assemblyReference = Reader.GetAssemblyReference(assemblyReferenceHandle);
                 var referencedAssemblyName = assemblyReference.GetAssemblyName().Name;
 
-                _loadContext.LoadFromAssemblyName(referencedAssemblyName, implicitLoad:true);
+                _loadContext.LoadFromAssemblyName(referencedAssemblyName, implicitLoad: true);
             }
 
             // Get all the type names so that we can look up by name
@@ -130,6 +130,41 @@ namespace MiddleweightReflection
                 return _nameToMrType.Values.ToImmutableArray<MrType>();
         }
 
+
+        //public ImmutableArray<MrCustomAttribute> GetCustomAttributes()
+        //{
+        //    var assemblyAttributeHandles = Reader.GetAssemblyDefinition().GetCustomAttributes();
+        //    var customAttributes = GetCustomAttributesFromHandles(assemblyAttributeHandles, this.Reader);
+        //    return customAttributes.ToImmutableArray();
+        //}
+
+
+        /// <summary>
+        /// Gets the assembly to which this type has been forwarded (or returns null).
+        /// </summary>
+        string GetForwardingAssemblyForType(string typeName)
+        {
+            // See if this type has been forward. For example, in .Net Framework,
+            // System.Uri used to live in System.Runtime but now lives in mscorlib,
+            // so there's a forwarder for it in System.Runtime.
+
+            foreach (var typeHandle in this.Reader.ExportedTypes)
+            {
+                var exportedType = this.Reader.GetExportedType(typeHandle);
+                var name = exportedType.Name.AsString(this.Reader);
+                var ns = exportedType.Namespace.AsString(this.Reader);
+
+                if (typeName == $"{ns}.{name}")
+                {
+                    var assemblyReference = Reader.GetAssemblyReference((AssemblyReferenceHandle)exportedType.Implementation);
+                    var referencedAssemblyName = assemblyReference.GetAssemblyName().Name;
+                    return referencedAssemblyName;
+                }
+            }
+
+            return null;
+        }
+
         void EnsureTypesAreLoaded()
         {
             if (_nameToMrType != null || IsFakeAssembly)
@@ -164,6 +199,16 @@ namespace MiddleweightReflection
                 _nameToMrType[fullName] = type;
                 return type;
             }
+            else
+            {
+                // The type isn't in this assembly, but there may be a forwarder for it
+                var forwardingAssembly = GetForwardingAssemblyForType(fullName);
+                if (forwardingAssembly != null)
+                {
+                    // Look up the type at that forwarding address
+                    return _loadContext.GetTypeFromAssembly(fullName, forwardingAssembly);
+                }
+            }
 
             throw new Exception("Type not found");
         }
@@ -176,12 +221,12 @@ namespace MiddleweightReflection
         /// </summary>
         internal MrType GetFromCacheOrCreate(TypeDefinitionHandle typeDefinitionHandle, Func<MrType> createType)
         {
-            if(_typeCache.TryGetValue(typeDefinitionHandle, out var type))
+            if (_typeCache.TryGetValue(typeDefinitionHandle, out var type))
             {
                 return type;
             }
 
-            lock(_typeCache)
+            lock (_typeCache)
             {
                 if (_typeCache.TryGetValue(typeDefinitionHandle, out type))
                 {
@@ -303,7 +348,15 @@ namespace MiddleweightReflection
 
         public override int GetHashCode()
         {
-            return this.Reader.GetHashCode();
+            if (this.Reader != null)
+            {
+                // Fake types don't have a Reader
+                return this.Reader.GetHashCode();
+            }
+            else
+            {
+                return this.Name.GetHashCode();
+            }
         }
     }
 
