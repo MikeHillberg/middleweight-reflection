@@ -432,7 +432,7 @@ namespace MiddleweightReflection
             public MrType ReplacementType { get; set; }
         }
 
-        private void RaiseFakeTypeRequired(string fullTypeName, string assemblyName, out MrType type)
+        internal void RaiseFakeTypeRequired(string fullTypeName, string assemblyName, out MrType type)
         {
             type = null;
             if (FakeTypeRequired != null)
