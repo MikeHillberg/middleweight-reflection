@@ -39,7 +39,7 @@ namespace MiddleweightReflection
                 MetadataReaderOptions = MetadataReaderOptions.ApplyWindowsRuntimeProjections;
             }
 
-            LoadFromAssemblyName("mscorlib", implicitLoad: true);
+            //LoadFromAssemblyName("mscorlib", implicitLoad: true);
         }
 
         /// <summary>
