@@ -194,9 +194,9 @@ namespace MiddleweightReflection
         /// <summary>
         /// Load an assembly from memory. If already loaded, return that.
         /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        public MrAssembly LoadAssemblyFromBytes(byte[] buffer)
+        /// <param name="buffer">Assembly contents</param>
+        /// <param name="path">Location of the assembly (optional and not used, just used to return from the Location property</param>
+        public MrAssembly LoadAssemblyFromBytes(byte[] buffer, string path)
         {
             var reader = CreateReaderFromBytes(buffer);
             var name = reader.GetString(reader.GetAssemblyDefinition().Name);
@@ -206,8 +206,18 @@ namespace MiddleweightReflection
                 return assembly;
             }
 
-            return LoadFromReader(reader, name, null, implicitLoad: false);
+            return LoadFromReader(reader, name, path, implicitLoad: false);
         }
+
+        /// <summary>
+        /// Load an assembly from memory. If already loaded, return that.
+        /// </summary>
+        public MrAssembly LoadAssemblyFromBytes(byte[] buffer)
+        {
+            return LoadAssemblyFromBytes(buffer, null);
+        }
+        
+
 
         /// <summary>
         /// Load given the assembly name. If already loaded, return that.
