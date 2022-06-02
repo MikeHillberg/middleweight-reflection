@@ -77,7 +77,7 @@ public enum UnitTestSampleAssembly.FlagsEnum : System.Enum
 
 public class UnitTestSampleAssembly.TestAttribute : System.Attribute
     AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
-    [AttributeUsageAttribute(32767)]
+    [AttributeUsageAttribute]
     public TestAttribute()
 
 public class Class3+NestedInClass3 : System.Object (nested)
