@@ -23,8 +23,6 @@ namespace MiddleweightReflection
 
         public MrLoadContext()
         {
-            // We always need mscorlib
-            LoadFromAssemblyName("mscorlib", implicitLoad: true);
         }
 
         /// <summary>
@@ -38,8 +36,6 @@ namespace MiddleweightReflection
             {
                 MetadataReaderOptions = MetadataReaderOptions.ApplyWindowsRuntimeProjections;
             }
-
-            LoadFromAssemblyName("mscorlib", implicitLoad: true);
         }
 
         /// <summary>
@@ -194,9 +190,9 @@ namespace MiddleweightReflection
         /// <summary>
         /// Load an assembly from memory. If already loaded, return that.
         /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        public MrAssembly LoadAssemblyFromBytes(byte[] buffer)
+        /// <param name="buffer">Assembly contents</param>
+        /// <param name="path">Location of the assembly (optional and not used, just used to return from the Location property</param>
+        public MrAssembly LoadAssemblyFromBytes(byte[] buffer, string path)
         {
             var reader = CreateReaderFromBytes(buffer);
             var name = reader.GetString(reader.GetAssemblyDefinition().Name);
@@ -206,7 +202,15 @@ namespace MiddleweightReflection
                 return assembly;
             }
 
-            return LoadFromReader(reader, name, null, implicitLoad: false);
+            return LoadFromReader(reader, name, path, implicitLoad: false);
+        }
+
+        /// <summary>
+        /// Load an assembly from memory. If already loaded, return that.
+        /// </summary>
+        public MrAssembly LoadAssemblyFromBytes(byte[] buffer)
+        {
+            return LoadAssemblyFromBytes(buffer, null);
         }
 
         /// <summary>
@@ -230,6 +234,18 @@ namespace MiddleweightReflection
         {
             if(_loadedAssemblies.TryGetValue(requestedName, out var assembly))
             {
+                return assembly;
+            }
+
+            if (_implicitAssemblies.TryGetValue(requestedName, out assembly))
+            {
+                // If we'd loaded this before implicitly, but now it's being loaded explicitly,
+                // move it to the right cache
+                if(!implicitLoad)
+                {
+                    _loadedAssemblies[requestedName] = assembly;
+                    _implicitAssemblies.Remove(requestedName);
+                }
                 return assembly;
             }
 
@@ -314,20 +330,8 @@ namespace MiddleweightReflection
             location = null;
             reader = null;
 
-            // We know where mscorlib is
-            if (requestedName.ToLower() == "mscorlib")
-            {
-                location = (typeof(string).Assembly).Location;
-            }
-
-            // And the rest of the System namespace
-            else if (requestedName == "System")
-            {
-                location = typeof(NetTcpStyleUriParser).Assembly.Location;
-            }
-
-            // Otherwise, use the callback to try and get the location
-            else if (AssemblyPathFromName != null)
+            // Use callback to try and find the assembly
+            if (AssemblyPathFromName != null)
             {
                 // It's OK for this to return null
                 location = AssemblyPathFromName(requestedName);
