@@ -212,8 +212,6 @@ namespace MiddleweightReflection
         {
             return LoadAssemblyFromBytes(buffer, null);
         }
-        
-
 
         /// <summary>
         /// Load given the assembly name. If already loaded, return that.
@@ -250,8 +248,6 @@ namespace MiddleweightReflection
                 }
                 return assembly;
             }
-
-
 
             CreateReaderFromAssemblyName(requestedName, out var reader, out var path);
             return LoadFromReader(reader, requestedName, path, implicitLoad);
