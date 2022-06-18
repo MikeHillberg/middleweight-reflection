@@ -75,36 +75,6 @@ namespace MiddleweightReflection
         public string Location { get; private set; }
         public string FullName => Name;
 
-        void CreateReaderFromAssemblyName(string requestedName)
-        {
-            if (requestedName.ToLower() == "mscorlib")
-            {
-                Location = (typeof(string).Assembly).Location;
-            }
-            else if (requestedName == "System")
-            {
-                Location = typeof(NetTcpStyleUriParser).Assembly.Location;
-            }
-            else
-            {
-                Location = _loadContext.AssemblyPathFromName(requestedName);
-            }
-
-            if (Location == null)
-            {
-                IsFakeAssembly = true;
-                return;
-            }
-
-            CreateReaderFromPath(Location);
-
-            Name = this.Reader.GetAssemblyDefinition().Name.AsString(this);
-            if (Name != Name)
-            {
-                throw new Exception($"Expected assembly name '{requestedName}', actual is '{Name}'");
-            }
-
-        }
 
         public MetadataReader Reader;
         unsafe void CreateReaderFromPath(string path)

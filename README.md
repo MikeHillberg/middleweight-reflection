@@ -15,10 +15,45 @@ There's a basic example in the [unit test](https://github.com/MikeHillberg/middl
 
 NuGet: https://www.nuget.org/packages/mikehillberg.middleweightreflection
 
+Note that unless you load .Net assemblies, assemblies such as `System` will be faked.
+The faking works pretty well, but for example you won't be able to determine the `T` in `EventHandler<T>`,
+because `System.EventHandler~1` will be faked.
+
+But you can supply extra assemblies using the `AssemblyPathFromName` callback.
+For example, handling a few interesting cases in .Net Framework:
+
+```cs
+var loadContext = new MrLoadContext();
+loadContext.AssemblyPathFromName = (requestedName) =>
+{
+    string location = null;
+
+    if (requestedName == "mscorlib")
+    {
+        location = (typeof(string).Assembly).Location;
+    }
+    else if (requestedName == "System")
+    {
+        location = typeof(NetTcpStyleUriParser).Assembly.Location;
+    }
+    else if (requestedName == "System.Runtime")
+    {
+        var mscorlib = (typeof(string).Assembly).Location;
+        mscorlib = mscorlib.Substring(0, mscorlib.LastIndexOf('\\'));
+        location = $@"{mscorlib}\System.Runtime.dll";
+    }
+    else
+    {
+        Debug.WriteLine($"Faking assembly {requestedName}");
+    }
+
+    return location;
+};
+```
+
 ## Issues
 
 There are some more advanced metadata features not covered yet, but the most notable are:
-* Nested types
 * Assembly attributes
 * Full support for fully qualified assembly names
 

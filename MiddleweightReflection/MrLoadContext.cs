@@ -23,8 +23,6 @@ namespace MiddleweightReflection
 
         public MrLoadContext()
         {
-            // We always need mscorlib
-            LoadFromAssemblyName("mscorlib", implicitLoad: true);
         }
 
         /// <summary>
@@ -38,8 +36,6 @@ namespace MiddleweightReflection
             {
                 MetadataReaderOptions = MetadataReaderOptions.ApplyWindowsRuntimeProjections;
             }
-
-            //LoadFromAssemblyName("mscorlib", implicitLoad: true);
         }
 
         /// <summary>
@@ -243,6 +239,20 @@ namespace MiddleweightReflection
                 return assembly;
             }
 
+            if (_implicitAssemblies.TryGetValue(requestedName, out assembly))
+            {
+                // If we'd loaded this before implicitly, but now it's being loaded explicitly,
+                // move it to the right cache
+                if(!implicitLoad)
+                {
+                    _loadedAssemblies[requestedName] = assembly;
+                    _implicitAssemblies.Remove(requestedName);
+                }
+                return assembly;
+            }
+
+
+
             CreateReaderFromAssemblyName(requestedName, out var reader, out var path);
             return LoadFromReader(reader, requestedName, path, implicitLoad);
         }
@@ -324,20 +334,8 @@ namespace MiddleweightReflection
             location = null;
             reader = null;
 
-            // We know where mscorlib is
-            if (requestedName.ToLower() == "mscorlib")
-            {
-                location = (typeof(string).Assembly).Location;
-            }
-
-            // And the rest of the System namespace
-            else if (requestedName == "System")
-            {
-                location = typeof(NetTcpStyleUriParser).Assembly.Location;
-            }
-
-            // Otherwise, use the callback to try and get the location
-            else if (AssemblyPathFromName != null)
+            // Use callback to try and find the assembly
+            if (AssemblyPathFromName != null)
             {
                 // It's OK for this to return null
                 location = AssemblyPathFromName(requestedName);
