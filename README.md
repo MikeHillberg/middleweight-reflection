@@ -51,6 +51,15 @@ loadContext.AssemblyPathFromName = (requestedName) =>
 };
 ```
 
+## Versions
+
+**1.1.3**
+Don't try to guess at the location of .Net assemblies like mscorlib;
+fake them by default, or caller can provide them.
+
+**1.1.2**
+Added an overload to LoadAssemblyFromBytes to take a path (which is just returned from Assembly.Location)
+
 ## Issues
 
 There are some more advanced metadata features not covered yet, but the most notable are:
