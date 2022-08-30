@@ -159,7 +159,10 @@ namespace MiddleweightReflection
                 return type;
             }
 
-            if (IsFakeAssembly)
+            // For fake assemblies, create a fake type
+            // bugbug: When loading with WinRT projections turned on I can't find 
+            // EventRegistrationToken in System.Runtime.InteropServices.WindowsRuntime assembly
+            if (IsFakeAssembly || fullName == "System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken")
             {
                 type = MrType.CreateFakeType(fullName, this);
                 if (_nameToMrType == null)

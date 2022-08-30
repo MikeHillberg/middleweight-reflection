@@ -20,7 +20,12 @@ namespace MiddleweightReflection
 
         MrType ICustomAttributeTypeProvider<MrType>.GetSystemType()
         {
-            return this.Assembly.LoadContext.GetTypeFromAssembly("System.Type", "mscorlib");
+            if(this.Assembly.LoadContext.TryFindMrType("System.Type", out var type))
+            {
+                return type;
+            }
+
+            throw new Exception("Couldn't find System.Type in any loaded assembly");
         }
 
         bool ICustomAttributeTypeProvider<MrType>.IsSystemType(MrType type)

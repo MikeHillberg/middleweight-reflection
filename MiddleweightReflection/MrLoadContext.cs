@@ -76,7 +76,7 @@ namespace MiddleweightReflection
             {
                 if (!_implicitAssemblies.TryGetValue(assemblyName, out assembly))
                 {
-                    throw new Exception("Can't find assembly");
+                    throw new Exception($"Can't find '{assemblyName}'");
                 }
             }
 
