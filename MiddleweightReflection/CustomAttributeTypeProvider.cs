@@ -52,7 +52,7 @@ namespace MiddleweightReflection
             if(type.IsFakeType)
             {
                 // This will be caught
-                throw new MrException("Can't get the underlying type of a fake type");
+                throw new MrException($"Can't get the underlying type of a fake type ({type.GetPrettyFullName()})");
             }
             Debug.Assert(type.IsEnum);
 
