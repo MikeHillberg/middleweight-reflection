@@ -39,6 +39,27 @@ public class UnitTestSampleAssembly.Class3 : UnitTestSampleAssembly.Class2<Syste
     public Class3()
     UnitTestSampleAssembly.Class3 PropOfNestedType { public get; }
 
+public class UnitTestSampleAssembly.ClosedType1 : UnitTestSampleAssembly.Class1<System.IO.Stream,System.Int32,System.String>
+    AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    public ClosedType1()
+    protected System.Void ProtectedAbstractVoidMethod0()
+
+public class UnitTestSampleAssembly.ClosedType2 : UnitTestSampleAssembly.Class1<System.IO.Stream,System.Double,System.String>
+    AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    public ClosedType2()
+    protected System.Void ProtectedAbstractVoidMethod0()
+
+public class UnitTestSampleAssembly.OpenTypeA<T> : System.Object
+    AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    public OpenTypeA<T>()
+    T Value { public get; public set; }
+
+public class UnitTestSampleAssembly.OpenTypeA<T,U> : System.Object
+    AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    public OpenTypeA<T,U>()
+    T TValue { public get; public set; }
+    U UValue { public get; public set; }
+
 public class UnitTestSampleAssembly.ExplicitInterfacesClass : System.Object
     AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
     UnitTestSampleAssembly.IPublicInterface

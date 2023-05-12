@@ -79,6 +79,9 @@ namespace MRUnitTests
             var prop = mrType.GetProperties().First((p) => p.GetName() == nameofMember);
             var mrType1 = prop.GetPropertyType();
 
+            // The open type should matched the closed type
+            Assert.IsTrue(mrType != mrType1);
+
             // Get that closed version of Class1 again. Because of the way SRM works, this will be a new instance of the MRType
             prop = mrType.GetProperties().First((p) => p.GetName() == nameofMember);
             var mrType2 = prop.GetPropertyType();
@@ -103,6 +106,20 @@ namespace MRUnitTests
             var event1 = mrType1.GetEvents()[0];
             var event2 = mrType2.GetEvents()[0];
             Assert.IsTrue(event1 == event2 && event1.Equals(event2) && !(event1 != event2) && event1.GetHashCode() == event2.GetHashCode() && event1.GetHashCode() == event2.GetHashCode());
+
+            // Types closed with different arguments shouldn't match
+            loadContext.TryFindMrType("UnitTestSampleAssembly.ClosedType1", out var closedType1a);
+            loadContext.TryFindMrType("UnitTestSampleAssembly.ClosedType1", out var closedType1b);
+            loadContext.TryFindMrType("UnitTestSampleAssembly.ClosedType2", out var closedType2);
+            Assert.IsTrue(closedType1a == closedType1b);
+            Assert.IsTrue(closedType1a != closedType2);
+
+            // Two types with the same name but different type parameter count
+            // (differ in TypeDefinitionHandle)
+            loadContext.TryFindMrType("UnitTestSampleAssembly.OpenTypeA`1", out var openTypeA1);
+            loadContext.TryFindMrType("UnitTestSampleAssembly.OpenTypeA`2", out var openTypeA2);
+            Assert.IsTrue(openTypeA1 != openTypeA2);
+
         }
 
 

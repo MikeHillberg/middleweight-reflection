@@ -102,6 +102,37 @@ namespace UnitTestSampleAssembly
         }
     }
 
+    // A full closed type
+    public class ClosedType1 : Class1<Stream, int, string>
+    {
+        protected override void ProtectedAbstractVoidMethod0()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    // Same as above, but closing with different type arguments
+    public class ClosedType2 : Class1<Stream, double, string>
+    {
+        protected override void ProtectedAbstractVoidMethod0()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    // An open type with one parameter
+    public class OpenTypeA<T>
+    {
+        public T Value { get; set; }
+    }
+
+    // Same open type as above but two parameters
+    public class OpenTypeA<T,U>
+    {
+        public T TValue { get; set; }
+        public U UValue { get; set; }
+    }
+
     public class ExplicitInterfacesClass : IPublicInterface, IInternalInterface
     {
         string IInternalInterface.InternalInterfaceStringMethod() { return ""; }
