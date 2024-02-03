@@ -51,6 +51,8 @@ namespace MiddleweightReflection
 
         public MrType GetFieldType()
         {
+            // Bugbug: this returns null for the ItemStructMap<T> type in WPF
+            // Maybe it's a problem because it's a nested type?
             return this.Definition.DecodeSignature(this.DeclaringType.Assembly.TypeProvider, null);
         }
 
