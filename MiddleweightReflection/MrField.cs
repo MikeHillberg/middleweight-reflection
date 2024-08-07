@@ -101,6 +101,9 @@ namespace MiddleweightReflection
                 case ConstantTypeCode.Byte:
                     return (int)blobReader.ReadByte();
 
+                case ConstantTypeCode.SByte:
+                    return (int)blobReader.ReadByte();
+
                 default:
                     throw new NotSupportedException("Unsupported ContentTypeCode");
             }
