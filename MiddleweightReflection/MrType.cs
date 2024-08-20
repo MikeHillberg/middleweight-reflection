@@ -177,6 +177,10 @@ namespace MiddleweightReflection
             bool matches =
                 this.Assembly == other.Assembly
                 && this.TypeCode == other.TypeCode
+                && this.IsArray == other.IsArray
+                && this.IsReference == other.IsReference
+                && this.IsPointer == other.IsPointer
+                && this.IsConst == other.IsConst
                 && this.IsTypeCode == other.IsTypeCode
                 && this.TypeDefinitionHandle == other.TypeDefinitionHandle
                 && this.GenericParameterHandle == other.GenericParameterHandle
