@@ -32,7 +32,7 @@ namespace MiddleweightReflection
         /// <param name="useWinRTProjections"></param>
         public MrLoadContext(bool useWinRTProjections)
         {
-            if(useWinRTProjections)
+            if (useWinRTProjections)
             {
                 MetadataReaderOptions = MetadataReaderOptions.ApplyWindowsRuntimeProjections;
             }
@@ -56,7 +56,7 @@ namespace MiddleweightReflection
             // because new fake assemblies might get generated. So use a for loop rather 
             // than a foreach iterator.
 
-            for(int i = 0; i < _assembliesToInitialize.Count ; i++)
+            for (int i = 0; i < _assembliesToInitialize.Count; i++)
             {
                 _assembliesToInitialize[i].Initialize();
             }
@@ -177,6 +177,12 @@ namespace MiddleweightReflection
         public MrAssembly LoadAssemblyFromPath(string path)
         {
             var reader = CreateReaderFromPath(path);
+            if (reader == null)
+            {
+                // Not an assembly
+                return null;
+            }
+
             var name = reader.GetString(reader.GetAssemblyDefinition().Name);
 
             if (_loadedAssemblies.TryGetValue(name, out var assembly))
@@ -232,7 +238,7 @@ namespace MiddleweightReflection
         /// <returns></returns>
         internal MrAssembly LoadFromAssemblyName(string requestedName, bool implicitLoad)
         {
-            if(_loadedAssemblies.TryGetValue(requestedName, out var assembly))
+            if (_loadedAssemblies.TryGetValue(requestedName, out var assembly))
             {
                 return assembly;
             }
@@ -241,7 +247,7 @@ namespace MiddleweightReflection
             {
                 // If we'd loaded this before implicitly, but now it's being loaded explicitly,
                 // move it to the right cache
-                if(!implicitLoad)
+                if (!implicitLoad)
                 {
                     _loadedAssemblies[requestedName] = assembly;
                     _implicitAssemblies.Remove(requestedName);
@@ -373,12 +379,20 @@ namespace MiddleweightReflection
         /// <returns></returns>
         unsafe MetadataReader CreateReaderFromBytes(byte[] buffer)
         {
-            var pinnedHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
-            var headers = new PEHeaders(new MemoryStream(buffer));
-            var startOffset = headers.MetadataStartOffset;
-            var metaDataStart = (byte*)pinnedHandle.AddrOfPinnedObject() + startOffset;
+            try
+            {
+                var pinnedHandle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+                var headers = new PEHeaders(new MemoryStream(buffer));
+                var startOffset = headers.MetadataStartOffset;
+                var metaDataStart = (byte*)pinnedHandle.AddrOfPinnedObject() + startOffset;
 
-            return new MetadataReader(metaDataStart, headers.MetadataSize, this.MetadataReaderOptions, null);
+                return new MetadataReader(metaDataStart, headers.MetadataSize, this.MetadataReaderOptions, null);
+            }
+            catch (BadImageFormatException)
+            {
+                // Not a metadata file
+                return null;
+            }
         }
 
         internal MetadataReaderOptions MetadataReaderOptions { get; private set; } = MetadataReaderOptions.None;

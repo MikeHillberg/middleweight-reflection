@@ -1,15 +1,13 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Metadata;
-using System.Runtime.InteropServices;
+using System.Reflection.PortableExecutable;
 using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace MiddleweightReflection
 {
@@ -67,7 +65,7 @@ namespace MiddleweightReflection
         {
             get
             {
-                if (IsFakeType)
+                if (IsFakeType || IsFunctionPointer)
                 {
                     return TypeAttributes.Public;
                 }
@@ -192,13 +190,45 @@ namespace MiddleweightReflection
                 return false;
             }
 
+            if (this.IsFunctionPointer)
+            {
+
+                var fp1 = this._functionPointerSignature;
+                var fp2 = other._functionPointerSignature;
+
+                if (fp1.Header != fp2.Header
+                    || fp1.ReturnType != fp2.ReturnType
+                    || fp1.GenericParameterCount != fp2.GenericParameterCount
+                    || fp1.RequiredParameterCount != fp2.RequiredParameterCount)
+                {
+                    return false;
+                }
+
+                var parmTypes1 = fp1.ParameterTypes;
+                var parmTypes2 = fp2.ParameterTypes;
+                if (parmTypes1.Length != parmTypes2.Length)
+                {
+                    return false;
+                }
+
+                for(int i = 0; i < parmTypes1.Length; i++)
+                {
+                    if (parmTypes1[i] != parmTypes1[i])
+                    {
+                        return false;
+                    }    
+                }
+
+                return true;
+            }
+
 
             // This matches so far, but could be an IFoo<T> and an IFoo<string>
             // First check if this is at least partially closed
             // (some of _typeArguments may actually still be parameters)
-            if(this._typeArguments != null || other._typeArguments != null)
+            if (this._typeArguments != null || other._typeArguments != null)
             {
-                if(this._typeArguments == null || other._typeArguments == null)
+                if (this._typeArguments == null || other._typeArguments == null)
                 {
                     // One has at least one type argument, the other doesn't (still full open)
                     return false;
@@ -266,12 +296,12 @@ namespace MiddleweightReflection
         {
             var code = TypeDefinitionHandle.GetHashCode();
             code += TypeCode.GetHashCode();
-            if(_fakeName != null)
+            if (_fakeName != null)
             {
                 code += _fakeName.GetHashCode();
             }
 
-            if(this.GenericParameterHandle != null)
+            if (this.GenericParameterHandle != null)
             {
                 code += GenericParameterHandle.GetHashCode();
             }
@@ -321,8 +351,13 @@ namespace MiddleweightReflection
             }
             else
             {
+                if (fakeFullName.Contains(","))
+                {
+                    int j = 1132;
+                }
                 _fakeNamespace = fakeFullName.Substring(0, index);
                 _fakeName = fakeFullName.Substring(index + 1);
+
             }
 
             Debug.WriteLine($"Faking {_fakeName}");
@@ -337,6 +372,7 @@ namespace MiddleweightReflection
                                     typeDefinitionHandle,
                                     () => new MrType(typeDefinitionHandle, assembly));
 
+            Debug.Assert(type != null);
             Debug.Assert(type == assembly.GetFromCacheOrCreate(typeDefinitionHandle, null));
 
             return type;
@@ -356,6 +392,43 @@ namespace MiddleweightReflection
         }
 
         public bool IsFakeType => _fakeName != null;
+
+        static internal MrType CreateFunctionPointerType(MethodSignature<MrType> signature)
+        {
+            return new MrType(signature);
+        }
+
+        // Function Pointer type
+        private MrType(MethodSignature<MrType> signature)
+        {
+            _isFunctionPointer = true;
+            _functionPointerSignature = signature;
+        }
+        bool _isFunctionPointer = false;
+        MethodSignature<MrType> _functionPointerSignature;
+
+
+        public bool IsFunctionPointer => _isFunctionPointer;
+
+        public MrType GetFunctionPointerReturnType()
+        {
+            if (!IsFunctionPointer)
+            {
+                throw new InvalidOperationException("Not a function pointer");
+            }
+
+            return _functionPointerSignature.ReturnType;
+        }
+
+        public ImmutableArray<MrType> GetFunctionPointerParameterTypes()
+        {
+            if (!IsFunctionPointer)
+            {
+                throw new InvalidOperationException("Not a function pointer");
+            }
+
+            return _functionPointerSignature.ParameterTypes.ToImmutableArray();
+        }
 
 
         /// <summary>
@@ -476,7 +549,7 @@ namespace MiddleweightReflection
         bool? _hasGenericParameters = null;
         public bool GetHasGenericParameters()
         {
-            if(_hasGenericParameters != null)
+            if (_hasGenericParameters != null)
             {
                 return _hasGenericParameters == true;
             }
@@ -500,7 +573,7 @@ namespace MiddleweightReflection
         /// <returns></returns>
         public MrType GetBaseType()
         {
-            if (IsTypeCode || IsFakeType || IsGenericParameter)
+            if (IsTypeCode || IsFakeType || IsGenericParameter || IsFunctionPointer)
             {
                 return null;
             }
@@ -555,7 +628,7 @@ namespace MiddleweightReflection
 
         public ImmutableArray<MrType> GetInterfaces(bool publicOnly = true)
         {
-            if (IsTypeCode || IsFakeType || IsGenericParameter)
+            if (IsTypeCode || IsFakeType || IsGenericParameter || IsFunctionPointer)
             {
                 return ImmutableArray<MrType>.Empty;
 
@@ -626,6 +699,11 @@ namespace MiddleweightReflection
                 return null;
             }
 
+            if (IsFunctionPointer)
+            {
+                return null;
+            }
+
             return TypeDefinition.Namespace.AsString(Assembly);
         }
 
@@ -633,7 +711,7 @@ namespace MiddleweightReflection
         {
             get
             {
-                if (IsTypeCode || IsFakeType)
+                if (IsTypeCode || IsFakeType || IsFunctionPointer)
                 {
                     return true;
                 }
@@ -648,7 +726,7 @@ namespace MiddleweightReflection
         {
             get
             {
-                if (IsTypeCode || IsFakeType)
+                if (IsTypeCode || IsFakeType || IsFunctionPointer)
                 {
                     return false;
                 }
@@ -662,7 +740,7 @@ namespace MiddleweightReflection
         {
             get
             {
-                if (IsTypeCode || IsFakeType)
+                if (IsTypeCode || IsFakeType || IsFunctionPointer)
                 {
                     return false;
                 }
@@ -679,7 +757,7 @@ namespace MiddleweightReflection
         {
             get
             {
-                if (IsTypeCode || IsFakeType)
+                if (IsTypeCode || IsFakeType || IsFunctionPointer)
                 {
                     return false;
                 }
@@ -695,7 +773,7 @@ namespace MiddleweightReflection
         {
             get
             {
-                if (IsTypeCode || IsFakeType)
+                if (IsTypeCode || IsFakeType || IsFunctionPointer)
                 {
                     return false;
                 }
@@ -722,7 +800,7 @@ namespace MiddleweightReflection
                     }
                 }
 
-                if (IsTypeCode)
+                if (IsTypeCode || IsFunctionPointer)
                 {
                     return false;
                 }
@@ -790,6 +868,7 @@ namespace MiddleweightReflection
 
                 return !IsEnum
                        && !IsStruct
+                       && !IsFunctionPointer
                        && TypeDefinition.Attributes.HasFlag(TypeAttributes.Class)
                        && !TypeDefinition.Attributes.HasFlag(TypeAttributes.Interface);
             }
@@ -810,7 +889,7 @@ namespace MiddleweightReflection
                     return false; // Randomly assuming class
                 }
 
-                if (IsTypeCode)
+                if (IsTypeCode || IsFunctionPointer)
                 {
                     return false;
                 }
@@ -842,7 +921,7 @@ namespace MiddleweightReflection
                     return false; // Randomly assuming class
                 }
 
-                if (IsTypeCode)
+                if (IsTypeCode || IsFunctionPointer)
                 {
                     return false;
                 }
@@ -872,7 +951,7 @@ namespace MiddleweightReflection
         {
             get
             {
-                if (this.IsTypeCode || this.IsFakeType)
+                if (this.IsTypeCode || this.IsFakeType || IsFunctionPointer)
                 {
                     return false;
                 }
@@ -888,7 +967,7 @@ namespace MiddleweightReflection
         {
             get
             {
-                if (IsFakeType || IsTypeCode)
+                if (IsFakeType || IsTypeCode || IsFunctionPointer)
                 {
                     return false;
                 }
@@ -912,7 +991,7 @@ namespace MiddleweightReflection
         {
             get
             {
-                if (IsFakeType)
+                if (IsFakeType || IsFunctionPointer)
                 {
                     return true;
                 }
@@ -929,10 +1008,14 @@ namespace MiddleweightReflection
         {
             get
             {
-                if (this.IsFakeType || this.IsTypeCode)
+                if (this.IsFakeType || this.IsTypeCode || IsFunctionPointer)
+                {
                     return string.Empty;
+                }
                 else
+                {
                     return this.Assembly.Location;
+                }
             }
         }
 
@@ -1014,10 +1097,37 @@ namespace MiddleweightReflection
             {
                 name = $"{Assembly.Reader.GetGenericParameter(GenericParameterHandle.Value).Name.AsString(Assembly)}";
             }
+            else if (IsFunctionPointer)
+            {
+                var result = new StringBuilder();
+                result.Append($"unsafe delegate* ");
+
+                if (_functionPointerSignature.Header.CallingConvention == SignatureCallingConvention.Default)
+                {
+                    result.Append("managed");
+                }
+                else
+                {
+                    result.Append($"unmanaged[{_functionPointerSignature.Header.CallingConvention.ToString()}]");
+                }
+
+                result.Append($"<");
+                result.Append(this.GetFunctionPointerReturnType().GetPrettyName());
+
+                foreach (var parameterType in GetFunctionPointerParameterTypes())
+                {
+                    result.Append(",");
+                    result.Append(parameterType.GetPrettyName());
+                }
+                result.Append(">");
+                name = result.ToString();
+            }
+
             else if (Assembly.Reader != null)
             {
                 name = GetTypeNameFromTypeDefinition(Assembly.Reader, TypeDefinition);
             }
+
             else
             {
                 throw new Exception("Internal error, can't find type name");
@@ -1090,7 +1200,7 @@ namespace MiddleweightReflection
             out ImmutableArray<MrMethod> constructors,
             bool publicishOnly = true)
         {
-            if (IsFakeType || IsTypeCode)
+            if (IsFakeType || IsTypeCode || IsFunctionPointer)
             {
                 methods = constructors = ImmutableArray<MrMethod>.Empty;
                 return;
@@ -1147,7 +1257,7 @@ namespace MiddleweightReflection
         /// <param name="publicishOnly">If true, only return public or protected methods (for an unsealed type)</param>
         public ImmutableArray<MrProperty> GetProperties(bool publicishOnly = true)
         {
-            if (IsFakeType || IsTypeCode)
+            if (IsFakeType || IsTypeCode || IsFunctionPointer)
             {
                 return ImmutableArray<MrProperty>.Empty;
             }
@@ -1195,7 +1305,7 @@ namespace MiddleweightReflection
         /// <param name="publicishOnly">If true, only return public or protected methods (for an unsealed type)</param>
         public ImmutableArray<MrEvent> GetEvents(bool publicishOnly = true)
         {
-            if (IsFakeType || IsTypeCode)
+            if (IsFakeType || IsTypeCode || IsFunctionPointer)
             {
                 return ImmutableArray<MrEvent>.Empty;
             }
@@ -1225,7 +1335,7 @@ namespace MiddleweightReflection
         /// <param name="publicishOnly">If true, only return public or protected methods (for an unsealed type)</param>
         public ImmutableArray<MrField> GetFields(bool publicishOnly = true)
         {
-            if (IsFakeType || IsTypeCode)
+            if (IsFakeType || IsTypeCode || IsFunctionPointer)
             {
                 return ImmutableArray<MrField>.Empty;
             }
@@ -1353,7 +1463,7 @@ namespace MiddleweightReflection
 
         override public ImmutableArray<MrCustomAttribute> GetCustomAttributes()
         {
-            if (IsTypeCode || IsFakeType || IsGenericParameter)
+            if (IsTypeCode || IsFakeType || IsGenericParameter || IsFunctionPointer)
             {
                 return ImmutableArray<MrCustomAttribute>.Empty;
             }
@@ -1375,7 +1485,7 @@ namespace MiddleweightReflection
         /// <returns></returns>
         public MrMethod GetInvokeMethod()
         {
-            if (IsFakeType)
+            if (IsFakeType || IsFunctionPointer)
             {
                 return null;
             }
@@ -1391,6 +1501,8 @@ namespace MiddleweightReflection
                 }
             }
 
+            Debug.Assert(this.GetFullName() == "System.MulticastDelegate"
+                          || this.GetFullName() == "System.Delegate");
             return null;
         }
     }

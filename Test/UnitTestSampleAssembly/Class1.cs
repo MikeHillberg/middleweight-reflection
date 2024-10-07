@@ -45,6 +45,14 @@ namespace UnitTestSampleAssembly
         public int PublicIntField;
 
         public object ObjectProperty { get; }
+
+        // Funtion pointers that take (string,float) parameters and return an int
+        // One uses managed calling convention, the other uses cdecl
+        public unsafe delegate*<int, string, float> FunctionPointerProperty { get; }
+        public unsafe delegate* unmanaged[Cdecl]<int, string, float> FunctionPointerProperty2 { get; }
+
+        protected Class1<T1, string, T3> _class1Field;
+
     }
 
     public class Class2<T1>

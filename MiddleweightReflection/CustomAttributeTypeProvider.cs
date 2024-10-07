@@ -40,9 +40,45 @@ namespace MiddleweightReflection
                 return mrType;
             }
 
+            if(name.Contains(","))
+            {
+                // bugbug: only support unqualified assembly names currently
+                // So e.g. with "System.Windows.Modifiability, PresentationCore, Version=8.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35",
+                // pull out "System.Windows.Modifiability"
+                // (This shows up in the Microsoft.WindowsDesktop.App .Net SDK)
+                name = name.Split(',')[0];
+            }
+
             // This is a type in an assembly that's not loaded, create a fake type.
             return MrType.CreateFakeType(name, assembly: null);
         }
+
+        readonly string[] _nonFlagsAttributes = new string[]
+        {
+                            "System.Runtime.InteropServices.CallingConvention",
+                            "System.ComponentModel.EditorBrowsableState",
+                            "System.Windows.Modifiability",
+                            "System.ComponentModel.DesignerSerializationVisibility",
+                            "System.ComponentModel.RefreshProperties",
+                            "System.Drawing.ContentAlignment",
+                            "System.Environment+SpecialFolder",
+                            "System.Runtime.InteropServices.ClassInterfaceType",
+                            "System.Runtime.InteropServices.ComInterfaceType",
+                            "System.Runtime.InteropServices.Marshalling.MarshalMode",
+                            "System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes",
+                            "System.StringComparison",
+                            "System.Windows.Media.Animation.HandoffBehavior",
+                            "System.Windows.Media.Animation.TimeSeekOrigin",
+                            "System.Windows.Readability"
+        };
+
+        readonly string[] _flagsAttributes = new string[]
+        {
+                    "System.Windows.Modifiability",
+                    "System.AttributeTargets",
+                    "System.Runtime.InteropServices.TypeLibTypeFlags",
+        };
+
 
         PrimitiveTypeCode ICustomAttributeTypeProvider<MrType>.GetUnderlyingEnumType(MrType type)
         {
@@ -57,15 +93,17 @@ namespace MiddleweightReflection
                 // Maybe we should pre-load some well-known .Net assemblies to handle this.
                 // But for now, just hard-coding a couple of frequent types.
 
-                const string callingConvention = "System.Runtime.InteropServices.CallingConvention";
                 var typeName = type.GetPrettyFullName();
-                if(typeName == callingConvention)
+
+                // Handle some hard-coded types in .Net
+                // First check for the non-flags types
+                if (_nonFlagsAttributes.Contains(typeName))
                 {
-                   return PrimitiveTypeCode.Int32;
+                    return PrimitiveTypeCode.Int32;
                 }
 
-                const string attributeTargets = "System.AttributeTargets";
-                if(typeName == attributeTargets)
+                // And then the [flags] types  
+                if (_flagsAttributes.Contains(typeName))
                 {
                     // [Flags] are unsigned
                     return PrimitiveTypeCode.UInt32;

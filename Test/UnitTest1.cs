@@ -144,7 +144,7 @@ namespace MRUnitTests
             {
                 WriteType(mrType, result);
 
-                if(mrType.GetName() == "Class3+NestedInClass3")
+                if (mrType.GetName() == "Class3+NestedInClass3")
                 {
                     WriteType(mrType, result, publicishOnly: false);
                 }
@@ -163,7 +163,7 @@ namespace MRUnitTests
             {
                 result.Append("public ");
             }
-            if(mrType.IsInternal)
+            if (mrType.IsInternal)
             {
                 result.Append("internal ");
             }
@@ -176,6 +176,26 @@ namespace MRUnitTests
             {
                 result.Append("private ");
             }
+
+            //if (mrType.IsFunctionPointer)
+            //{
+            //    result.Append(mrType.GetPrettyFullName());
+            //    return;
+            //    //result.Append($"unsafe delegate* <");
+
+            //    ////bugbug: managed/unmanaged
+
+            //    //WriteType(mrType.GetFunctionPointerReturnType(), result);
+
+            //    //foreach (var parameterType in mrType.GetFunctionPointerParameterTypes())
+            //    //{
+            //    //    result.Append(",");
+            //    //    WriteType(parameterType, result);
+            //    //}
+            //    //result.Append(">");
+
+            //    //return;
+            //}
 
             var classKind = "";
             if (mrType.IsStruct)
@@ -197,7 +217,7 @@ namespace MRUnitTests
                 result.Append($" : {mrType.GetBaseType().GetPrettyFullName()}");
             }
 
-            if(mrType.IsNestedType)
+            if (mrType.IsNestedType)
             {
                 result.Append(" (nested)");
             }
@@ -238,7 +258,7 @@ namespace MRUnitTests
             }
 
             var nestedTypes = mrType.GetNestedTypes();
-            foreach(var nestedType in nestedTypes)
+            foreach (var nestedType in nestedTypes)
             {
                 result.AppendLine($"    nested {nestedType.GetPrettyName()}");
             }
@@ -250,7 +270,7 @@ namespace MRUnitTests
             foreach (var constructor in constructors)
             {
                 var typeName = constructor.DeclaringType.GetPrettyName();
-                if(mrType.IsNestedType)
+                if (mrType.IsNestedType)
                 {
                     typeName = typeName.Split('+').Last();
                 }
@@ -283,7 +303,7 @@ namespace MRUnitTests
                     if (property.Getter != null)
                     {
                         WriteMethodAccess(property.Getter, result);
-                        result.Append("get; "); 
+                        result.Append("get; ");
                     }
 
                     if (property.Setter != null)
@@ -339,7 +359,7 @@ namespace MRUnitTests
             if (!publicishOnly)
             {
                 typeEventNames = new List<string>();
-                foreach(var ev in typeEvents)
+                foreach (var ev in typeEvents)
                 {
                     typeEventNames.Add(ev.GetName());
                 }
@@ -356,7 +376,7 @@ namespace MRUnitTests
                 // once as an event and then again as a field.
                 if (!publicishOnly)
                 {
-                    if(typeEventNames.Contains(name))
+                    if (typeEventNames.Contains(name))
                     {
                         continue;
                     }
@@ -381,27 +401,27 @@ namespace MRUnitTests
         {
             var access = method.GetMethodAccess();
 
-            if(access.IsPublic)
+            if (access.IsPublic)
             {
                 result.Append("public ");
             }
 
-            if(access.IsPrivate)
+            if (access.IsPrivate)
             {
                 result.Append("private ");
             }
 
-            if(access.IsProtected)
+            if (access.IsProtected)
             {
                 result.Append("protected ");
             }
 
-            if(access.IsInternal)
+            if (access.IsInternal)
             {
                 result.Append("internal ");
             }
 
-            if(access.IsStatic)
+            if (access.IsStatic)
             {
                 result.Append("static ");
             }

@@ -3,7 +3,7 @@ internal class <Module>
     NotPublic
 
 internal class UnitTestWinRTComponent.<CLR>WinRTComponent : System.Object
-    AutoLayout, AnsiClass, Class, Sealed, SpecialName, BeforeFieldInit
+    Sealed, SpecialName, BeforeFieldInit
     [MarshalingBehaviorAttribute]
     [ThreadingAttribute]
     [VersionAttribute(16777216)]
@@ -13,7 +13,7 @@ internal class UnitTestWinRTComponent.<CLR>WinRTComponent : System.Object
     System.Collections.Generic.IList<System.String> StringList { public get; public set; }
 
 public class UnitTestWinRTComponent.WinRTComponent : System.Object
-    AutoLayout, AnsiClass, Class, Public, Sealed, WindowsRuntime, BeforeFieldInit
+    Public, Sealed, WindowsRuntime, BeforeFieldInit
     [MarshalingBehaviorAttribute]
     [ThreadingAttribute]
     [VersionAttribute(16777216)]
@@ -25,7 +25,7 @@ public class UnitTestWinRTComponent.WinRTComponent : System.Object
     Windows.Foundation.Collections.IVector<System.String> StringList { public get; public set; }
 
 internal interface UnitTestWinRTComponent.IWinRTComponentClass
-    AutoLayout, AnsiClass, Class, ClassSemanticsMask, Abstract, WindowsRuntime
+    ClassSemanticsMask, Abstract, WindowsRuntime
     [CompilerGeneratedAttribute]
     [GuidAttribute(595258099, 43547, 21940, 123, 11, 53, 220, 245, 117, 190, 210)]
     [VersionAttribute(16777216)]
