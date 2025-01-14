@@ -403,6 +403,12 @@ namespace MiddleweightReflection
             var typeReference = reader.GetTypeReference(referenceHandle);
             var scopeEntityHandle = typeReference.ResolutionScope;
 
+            while(scopeEntityHandle.Kind == HandleKind.TypeReference)
+            {
+                typeReference = reader.GetTypeReference((TypeReferenceHandle)scopeEntityHandle);
+                scopeEntityHandle = typeReference.ResolutionScope;
+            }
+
             string name = typeReference.Namespace.IsNil
                 ? reader.GetString(typeReference.Name)
                 : reader.GetString(typeReference.Namespace) + "." + reader.GetString(typeReference.Name);
