@@ -69,7 +69,9 @@ namespace MiddleweightReflection
                             "System.StringComparison",
                             "System.Windows.Media.Animation.HandoffBehavior",
                             "System.Windows.Media.Animation.TimeSeekOrigin",
-                            "System.Windows.Readability"
+                            "System.Windows.Readability",
+                            "Windows.Foundation.Metadata.ThreadingModel",
+                            "Windows.Foundation.Metadata.MarshalingType"
         };
 
         readonly string[] _flagsAttributes = new string[]
