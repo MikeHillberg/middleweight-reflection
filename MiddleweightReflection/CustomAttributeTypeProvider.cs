@@ -71,6 +71,7 @@ namespace MiddleweightReflection
                             "System.Windows.Media.Animation.TimeSeekOrigin",
                             "System.Windows.Readability",
                             "Windows.Foundation.Metadata.ThreadingModel",
+                            "Windows.Foundation.Metadata.DeprecationType",
                             "Windows.Foundation.Metadata.MarshalingType"
         };
 

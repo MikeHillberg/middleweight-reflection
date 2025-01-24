@@ -420,6 +420,54 @@ namespace MiddleweightReflection
             return _functionPointerSignature.ReturnType;
         }
 
+        /// <summary>
+        /// A modified type is an array, pointer, or reference type.
+        /// </summary>
+        public bool IsModifiedType => IsArray || IsPointer || IsReference;
+
+        /// <summary>
+        /// For a modified type, the unmodified type is the type that is being modified.
+        /// So `Foo` in `Foo[]`, `Foo*`, or `ref Foo`.
+        /// (Not sure if it's possible for this to be null but `IsModifiedType` true)
+        /// </summary>
+        /// <returns></returns>
+        public MrType GetUnmodifiedType()
+        {
+            if(!IsModifiedType)
+            {
+                return null;
+            }
+
+            var unmodifiedTypeName = GetUnmodifiedTypeName(GetFullName(), out var arrayRank, out bool isReference, out bool isPointer);
+
+            if(arrayRank == null && !isReference && !isPointer)
+            {
+                Debug.Assert(false, "Modified type isn't a modified type");
+                return null;
+            }
+
+            if(IsTypeCode)
+            {
+                return CreatePrimitiveType(this.TypeCode);
+            }
+
+            MrType unmodifiedType = null;
+            var found = this.Assembly?.LoadContext?.TryFindMrType(unmodifiedTypeName, out unmodifiedType);
+            if(found.HasValue && found.Value)
+            {
+                Debug.Assert(unmodifiedType != null);
+                return unmodifiedType;
+            }
+
+            if(this.Assembly == null)
+            {
+                Debug.Assert(false, "Non-primitive type should have an Assembly");
+                return null;
+            }
+
+            return this.Assembly.LoadContext.CreateFakeType(unmodifiedTypeName);
+        }
+
         public ImmutableArray<MrType> GetFunctionPointerParameterTypes()
         {
             if (!IsFunctionPointer)
@@ -1145,20 +1193,20 @@ namespace MiddleweightReflection
                 }
             }
 
-            if (IsArray)
-            {
-                name = name + "[]";
-            }
+                if (IsArray)
+                {
+                    name = name + "[]";
+                }
 
-            if (IsReference)
-            {
-                name = name + "&";
-            }
+                if (IsReference)
+                {
+                    name = name + "&";
+                }
 
-            if (IsPointer)
-            {
-                name = name + "*";
-            }
+                if (IsPointer)
+                {
+                    name = name + "*";
+                }
 
             return name;
         }
@@ -1168,7 +1216,7 @@ namespace MiddleweightReflection
         /// </summary>
         internal static string GetUnmodifiedTypeName(
             string name,
-            out int? arrayRank,
+            out int? arrayRank, // bugbug: why isn't this just an int?
             out bool isReference,
             out bool isPointer)
         {

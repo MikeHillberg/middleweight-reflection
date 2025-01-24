@@ -22,7 +22,7 @@ namespace MiddleweightReflection
         public MrMethod Setter { get; private set; }
 
         private MrProperty(
-            MrType declaringType, 
+            MrType declaringType,
             PropertyDefinitionHandle propertyDefinitionHandle,
             PropertyDefinition propertyDefinition)
         {
@@ -33,7 +33,7 @@ namespace MiddleweightReflection
 
 
         internal static MrProperty TryGetProperty(
-            MrType declaringType, 
+            MrType declaringType,
             PropertyDefinitionHandle propertyDefinitionHandle,
             bool publicishOnly)
         {
@@ -50,7 +50,7 @@ namespace MiddleweightReflection
                 propertyAccessors.Setter,
                 publicishOnly);
 
-            if(mrGetter != null || mrSetter != null)
+            if (mrGetter != null || mrSetter != null)
             {
                 return new MrProperty(declaringType, propertyDefinitionHandle, propertyDefinition)
                 {
@@ -63,7 +63,7 @@ namespace MiddleweightReflection
         }
 
         private static MrMethod TryGetEtter(
-            MrType declaringType, 
+            MrType declaringType,
             MethodDefinitionHandle methodDefinitionHandle,
             bool publicishOnly)
         {
@@ -73,9 +73,20 @@ namespace MiddleweightReflection
                 var attributes = methodDefinition.Attributes;
                 if (!publicishOnly || MrMethod.AreAttributesPublicish(attributes, declaringType))
                 {
-                    return new MrMethod(methodDefinitionHandle, declaringType, methodDefinition );
+                    // Creating an MrMethod can fail in un-predictable ways inside System.Reflection.Metadata
+                    // (If a dependent assembly is passed in the LoadContext that's incompatible)
+                    // Since this is a Try method, catch the exception
+                    try
+                    {
+                        return new MrMethod(methodDefinitionHandle, declaringType, methodDefinition);
+                    }
+                    catch (Exception)
+                    {
+                        // Logging?
+                    }
                 }
             }
+
             return null;
         }
 
@@ -118,7 +129,7 @@ namespace MiddleweightReflection
         /// The property's getter and setter, either of which could be null
         /// </summary>
         static void GetGetterAndSetter(
-            PropertyDefinition propertyDefinition, 
+            PropertyDefinition propertyDefinition,
             MrType declaringType,
             bool publicishOnly,
             out MrMethod getter, out MrMethod setter)
@@ -147,7 +158,7 @@ namespace MiddleweightReflection
 
             var getterHandle = Definition.GetAccessors().Getter;
             etterMethod = MrMethod.TryGetMethod(getterHandle, this.DeclaringType, publicishOnly);
-            if(etterMethod == null)
+            if (etterMethod == null)
             {
                 var setterHandle = Definition.GetAccessors().Getter;
                 etterMethod = MrMethod.TryGetMethod(setterHandle, this.DeclaringType, publicishOnly);

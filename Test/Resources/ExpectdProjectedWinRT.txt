@@ -4,8 +4,8 @@ internal class <Module>
 
 public class UnitTestWinRTComponent.WinRTComponent : System.Object
     Public, Sealed, BeforeFieldInit
-    [MarshalingBehaviorAttribute]
-    [ThreadingAttribute]
+    [MarshalingBehaviorAttribute(2)]
+    [ThreadingAttribute(3)]
     [VersionAttribute(16777216)]
     [ActivatableAttribute(16777216)]
     UnitTestWinRTComponent.IWinRTComponentClass
@@ -14,8 +14,8 @@ public class UnitTestWinRTComponent.WinRTComponent : System.Object
 
 internal class UnitTestWinRTComponent.<WinRT>WinRTComponent : System.Object
     Sealed, Import, WindowsRuntime, BeforeFieldInit
-    [MarshalingBehaviorAttribute]
-    [ThreadingAttribute]
+    [MarshalingBehaviorAttribute(2)]
+    [ThreadingAttribute(3)]
     [VersionAttribute(16777216)]
     [CompilerGeneratedAttribute]
     [ActivatableAttribute(16777216)]

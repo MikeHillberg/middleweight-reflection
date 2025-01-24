@@ -53,6 +53,17 @@ namespace UnitTestSampleAssembly
 
         protected Class1<T1, string, T3> _class1Field;
 
+        public void ModifiedTypes1(out string p1, ref string p2, string[] p3, out string[] p4)
+        {
+            p1 = null;
+            p4 = null;
+        }
+
+        public void ModifiedTypes2(out Class2<Stream> p1, ref Class2<Stream> p2, Class2<Stream>[] p3, out Class2<Stream>[] p4)
+        {
+            p1 = null;
+            p4 = null;
+        }
     }
 
     public class Class2<T1>

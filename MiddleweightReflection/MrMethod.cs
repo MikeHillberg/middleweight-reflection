@@ -140,7 +140,17 @@ namespace MiddleweightReflection
             var attributes = methodDefinition.Attributes;
             if (!publicishOnly || AreAttributesPublicish(attributes, declaringType))
             {
-                return new MrMethod(methodDefinitionHandle, declaringType, methodDefinition);
+                // Creating an MrMethod can fail in un-predictable ways inside System.Reflection.Metadata
+                // (If a dependent assembly is passed in the LoadContext that's incompatible)
+                // Since this is a Try method, catch the exception
+                try
+                {
+                    return new MrMethod(methodDefinitionHandle, declaringType, methodDefinition);
+                }
+                catch(Exception)
+                {
+                    // logging?
+                }
             }
 
             return null;

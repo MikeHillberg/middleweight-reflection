@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Runtime.InteropServices;
@@ -83,6 +84,8 @@ namespace MiddleweightReflection
             if (assembly.IsFakeAssembly)
             {
                 assembly.LoadContext.RaiseFakeTypeRequired(fullTypeName, assemblyName, out var replacementType);
+
+                // If above returns null, the below GetTypeFromName will create a fake type
                 if (replacementType != null)
                 {
                     return replacementType;
@@ -90,6 +93,12 @@ namespace MiddleweightReflection
             }
 
             return assembly.GetTypeFromName(fullTypeName);
+        }
+
+        internal MrType CreateFakeType(string fullTypeName)
+        {
+            this.RaiseFakeTypeRequired(fullTypeName, null, out var replacementType);
+            return replacementType;
         }
 
         /// <summary>

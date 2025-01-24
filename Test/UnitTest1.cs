@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -131,7 +132,7 @@ namespace MRUnitTests
             var builder = new StringBuilder();
             var typesString = WriteTypes(testAssembly);
 
-            Assert.AreEqual(typesString, expectedOutput);
+            Assert.AreEqual(expectedOutput, typesString);
         }
 
 
@@ -438,7 +439,34 @@ namespace MRUnitTests
                     result.Append(", ");
                 }
 
-                result.Append($"{parameter.GetParameterType().GetFullName()} {parameter.GetParameterName()}");
+                bool isOut = parameter.Attributes.HasFlag(ParameterAttributes.Out);
+
+                if (isOut)
+                {
+                    result.Append("out ");
+                }
+
+                bool isRef = parameter.GetParameterType().IsReference;
+
+                if (isRef && !isOut)
+                {
+                    result.Append("ref ");
+                }
+
+                var isArray = parameter.GetParameterType().IsArray;
+
+                var parameterType = parameter.GetParameterType();
+                if(isRef || isOut || isArray)
+                {
+                    parameterType = parameterType.GetUnmodifiedType();
+                }
+
+                result.Append($"{parameterType.GetPrettyFullName()} {parameter.GetParameterName()}");
+
+                if(isArray)
+                {
+                    result.Append("[]");
+                }
             }
         }
 
