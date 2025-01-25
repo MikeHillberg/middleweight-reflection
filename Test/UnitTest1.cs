@@ -393,7 +393,8 @@ namespace MRUnitTests
                 }
                 else
                 {
-                    result.AppendLine($"    {field.GetFieldType().GetPrettyFullName()} {field.GetName()};");
+                    var constModifier = field.IsConst ? "const " : "";
+                    result.AppendLine($"    {constModifier}{field.GetFieldType().GetPrettyFullName()} {field.GetName()};");
                 }
             }
         }

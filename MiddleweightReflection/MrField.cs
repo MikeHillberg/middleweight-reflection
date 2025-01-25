@@ -40,6 +40,19 @@ namespace MiddleweightReflection
             return $"{this.DeclaringType.GetPrettyName()}.{GetName()}";
         }
 
+        /// <summary>
+        /// Const field (Literal and Static)
+        /// </summary>
+        public bool IsConst
+        {
+            get
+            {
+                // Enum fields are Literal, const fields are also static
+                return this.Definition.Attributes.HasFlag(FieldAttributes.Literal)
+                    && this.Definition.Attributes.HasFlag(FieldAttributes.Static);
+            }
+        }
+
         public bool IsPrivate
         {
             get

@@ -43,6 +43,7 @@ namespace UnitTestSampleAssembly
         static int PrivateStaticIntField = 1;
         const int PrivateConstIntField = 2;
         public int PublicIntField;
+        public const int PublicConstField = 3;
 
         public object ObjectProperty { get; }
 
