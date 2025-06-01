@@ -210,6 +210,12 @@ namespace MiddleweightReflection
         public MrAssembly LoadAssemblyFromBytes(byte[] buffer, string path)
         {
             var reader = CreateReaderFromBytes(buffer);
+            if(reader == null)
+            {
+                // Not an assembly
+                return null;
+            }
+
             var name = reader.GetString(reader.GetAssemblyDefinition().Name);
 
             if (_loadedAssemblies.TryGetValue(name, out var assembly))
