@@ -15,7 +15,19 @@ namespace MiddleweightReflection
 {
     public class MrAssembly
     {
-        public string Name { get; private set; }
+        string _name;
+        public string Name
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_name) && Reader != null)
+                {
+                    _name = Reader.GetString(Reader.GetAssemblyDefinition().Name);
+                }
+                return _name;
+            }
+            private set { _name = value; }
+        }
         MrLoadContext _loadContext;
         public MrLoadContext LoadContext { get { return _loadContext; } }
 
@@ -73,7 +85,114 @@ namespace MiddleweightReflection
         }
 
         public string Location { get; private set; }
-        public string FullName => Name;
+
+        /// <summary>
+        /// Gets the assembly version from the assembly definition metadata.
+        /// </summary>
+        public Version Version
+        {
+            get
+            {
+                if (IsFakeAssembly || Reader == null)
+                {
+                    return null;
+                }
+                return Reader.GetAssemblyDefinition().Version;
+            }
+        }
+
+        /// <summary>
+        /// Gets the culture string (e.g. "en-US") or empty for culture-neutral assemblies.
+        /// </summary>
+        public string Culture
+        {
+            get
+            {
+                if (IsFakeAssembly || Reader == null)
+                {
+                    return null;
+                }
+                var cultureHandle = Reader.GetAssemblyDefinition().Culture;
+                return cultureHandle.IsNil ? string.Empty : cultureHandle.AsString(Reader);
+            }
+        }
+
+        /// <summary>
+        /// Gets the public key of the assembly, or an empty array if not strong-named.
+        /// </summary>
+        public ImmutableArray<byte> PublicKey
+        {
+            get
+            {
+                if (IsFakeAssembly || Reader == null)
+                {
+                    return ImmutableArray<byte>.Empty;
+                }
+                var blobHandle = Reader.GetAssemblyDefinition().PublicKey;
+                return blobHandle.IsNil ? ImmutableArray<byte>.Empty : Reader.GetBlobContent(blobHandle);
+            }
+        }
+
+        /// <summary>
+        /// Gets the assembly flags.
+        /// </summary>
+        public System.Reflection.AssemblyFlags Flags
+        {
+            get
+            {
+                if (IsFakeAssembly || Reader == null)
+                {
+                    return default;
+                }
+                return Reader.GetAssemblyDefinition().Flags;
+            }
+        }
+
+        /// <summary>
+        /// Gets the hash algorithm used by this assembly.
+        /// </summary>
+        public AssemblyHashAlgorithm HashAlgorithm
+        {
+            get
+            {
+                if (IsFakeAssembly || Reader == null)
+                {
+                    return default;
+                }
+                return Reader.GetAssemblyDefinition().HashAlgorithm;
+            }
+        }
+
+        /// <summary>
+        /// Gets the AssemblyName, including public key token and processor architecture.
+        /// </summary>
+        public AssemblyName GetAssemblyName()
+        {
+            if (IsFakeAssembly || Reader == null)
+            {
+                return null;
+            }
+            return Reader.GetAssemblyDefinition().GetAssemblyName();
+        }
+
+        /// <summary>
+        /// Gets the assemblies referenced by this assembly.
+        /// </summary>
+        public ImmutableArray<AssemblyName> GetReferencedAssemblies()
+        {
+            if (IsFakeAssembly || Reader == null)
+            {
+                return ImmutableArray<AssemblyName>.Empty;
+            }
+
+            var builder = ImmutableArray.CreateBuilder<AssemblyName>();
+            foreach (var handle in Reader.AssemblyReferences)
+            {
+                var reference = Reader.GetAssemblyReference(handle);
+                builder.Add(reference.GetAssemblyName());
+            }
+            return builder.ToImmutable();
+        }
 
 
         public MetadataReader Reader;
@@ -101,12 +220,24 @@ namespace MiddleweightReflection
         }
 
 
-        //public ImmutableArray<MrCustomAttribute> GetCustomAttributes()
-        //{
-        //    var assemblyAttributeHandles = Reader.GetAssemblyDefinition().GetCustomAttributes();
-        //    var customAttributes = GetCustomAttributesFromHandles(assemblyAttributeHandles, this.Reader);
-        //    return customAttributes.ToImmutableArray();
-        //}
+        /// <summary>
+        /// Gets the custom attributes applied at the assembly level.
+        /// </summary>
+        public ImmutableArray<MrCustomAttribute> GetCustomAttributes()
+        {
+            if (IsFakeAssembly || Reader == null)
+            {
+                return ImmutableArray<MrCustomAttribute>.Empty;
+            }
+
+            var assemblyAttributeHandles = Reader.GetAssemblyDefinition().GetCustomAttributes();
+            var customAttributes = new List<MrCustomAttribute>(assemblyAttributeHandles.Count);
+            foreach (var handle in assemblyAttributeHandles)
+            {
+                customAttributes.Add(new MrCustomAttribute(handle, null, this));
+            }
+            return customAttributes.ToImmutableArray();
+        }
 
 
         /// <summary>

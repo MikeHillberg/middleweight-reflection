@@ -42,12 +42,42 @@ namespace MiddleweightReflection
 
                 case HandleKind.MemberReference:
                     {
-                        var targetTypeDefinition = Assembly.Reader.GetTypeDefinition(TargetType.TypeDefinitionHandle);
                         var constructorReference = Assembly.Reader.GetMemberReference((MemberReferenceHandle)CustomAttribute.Constructor);
-                        var declaringType = Assembly.GetTypeFromEntityHandle(constructorReference.Parent, targetTypeDefinition);
 
-                        name = declaringType.GetName();
-                        ns = declaringType.GetNamespace();
+                        // For assembly-level attributes, TargetType may be null.
+                        // Resolve the attribute type directly from the member reference parent.
+                        if (TargetType != null)
+                        {
+                            var targetTypeDefinition = Assembly.Reader.GetTypeDefinition(TargetType.TypeDefinitionHandle);
+                            var declaringType = Assembly.GetTypeFromEntityHandle(constructorReference.Parent, targetTypeDefinition);
+                            name = declaringType.GetName();
+                            ns = declaringType.GetNamespace();
+                        }
+                        else
+                        {
+                            // No target type (e.g. assembly-level attribute). Resolve from the parent handle directly.
+                            switch (constructorReference.Parent.Kind)
+                            {
+                                case HandleKind.TypeReference:
+                                    {
+                                        var typeRef = Assembly.Reader.GetTypeReference((TypeReferenceHandle)constructorReference.Parent);
+                                        name = typeRef.Name.AsString(Assembly.Reader);
+                                        ns = typeRef.Namespace.AsString(Assembly.Reader);
+                                    }
+                                    break;
+
+                                case HandleKind.TypeDefinition:
+                                    {
+                                        var typeDef = Assembly.Reader.GetTypeDefinition((TypeDefinitionHandle)constructorReference.Parent);
+                                        name = typeDef.Name.AsString(Assembly.Reader);
+                                        ns = typeDef.Namespace.AsString(Assembly.Reader);
+                                    }
+                                    break;
+
+                                default:
+                                    throw new Exception($"Unsupported parent handle kind: {constructorReference.Parent.Kind}");
+                            }
+                        }
                     }
                     break;
 

@@ -14,6 +14,7 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     <AssemblyTitle>MRUnitTests</AssemblyTitle>
     <Product>MRUnitTests</Product>
     <Copyright>Copyright ©  2019</Copyright>
