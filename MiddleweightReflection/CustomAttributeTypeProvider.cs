@@ -115,9 +115,9 @@ namespace MiddleweightReflection
                 var message = $"Can't get the underlying type of a fake type ({type.GetPrettyFullName()})";
                 Debug.WriteLine(message);
 
-                // We're in an MR stack frame now, above some SMR frames, and then MR
-                // So we're throwing from MR through SMR to an MR catch block.
-                throw new MrException(message);
+                // Most enums use Int32 as their underlying type. Rather than throwing
+                // (which causes attribute arguments to be lost entirely), default to Int32.
+                return PrimitiveTypeCode.Int32;
             }
             Debug.Assert(type.IsEnum);
 

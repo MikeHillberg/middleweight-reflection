@@ -351,10 +351,6 @@ namespace MiddleweightReflection
             }
             else
             {
-                if (fakeFullName.Contains(","))
-                {
-                    int j = 1132;
-                }
                 _fakeNamespace = fakeFullName.Substring(0, index);
                 _fakeName = fakeFullName.Substring(index + 1);
 

@@ -15,6 +15,12 @@
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
+
+  <!-- Build output root: uses MR_BUILD_ROOT env var if set -->
+  <PropertyGroup Condition="'$(MR_BUILD_ROOT)' != ''">
+    <BaseOutputPath>$(MR_BUILD_ROOT)\MiddleweightReflection\</BaseOutputPath>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="System.Buffers" Version="4.5.1" />
