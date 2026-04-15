@@ -89,8 +89,10 @@ namespace MiddleweightReflection
 
             modifiers.IsPublic = MrMethod.IsPublicMethodAttributes(attributes);
             modifiers.IsPrivate = MrMethod.IsPrivateMethodAttributes(attributes);
-            modifiers.IsInternal = MrMethod.IsInternalMethodAttributes(attributes);
-            modifiers.IsProtected = MrMethod.IsProtectedMethodAttributes(attributes);
+            modifiers.IsInternal = MrMethod.IsInternalMethodAttributes(attributes)
+                                    || MrMethod.IsFamilyOrAssemblyMethodAttributes(attributes);
+            modifiers.IsProtected = MrMethod.IsProtectedMethodAttributes(attributes)
+                                    || MrMethod.IsFamilyOrAssemblyMethodAttributes(attributes);
             modifiers.IsVirtual = MrMethod.IsVirtualMethodAttributes(attributes);
             modifiers.IsOverride = MrMethod.IsOverrideMethodAttributes(attributes);
             modifiers.IsSealed = MrMethod.IsSealedMethodAttributes(attributes);
@@ -281,14 +283,30 @@ namespace MiddleweightReflection
 
         internal static bool AreAttributesPublicish(MethodAttributes attributes, MrType declaringType)
         {
-            if (MrMethod.IsPublicMethodAttributes(attributes)
-                || MrMethod.IsProtectedMethodAttributes(attributes)
-                    && !declaringType.IsSealed)
+            if (MrMethod.IsPublicMethodAttributes(attributes))
             {
                 return true;
             }
 
+            // Include protected members if the type is not sealed (they can be overridden)
+            // This includes:
+            // - Family (protected)
+            // - FamORAssem (protected internal) - accessible to derived types outside the assembly
+            if (!declaringType.IsSealed)
+            {
+                if (MrMethod.IsProtectedMethodAttributes(attributes)
+                    || MrMethod.IsFamilyOrAssemblyMethodAttributes(attributes))
+                {
+                    return true;
+                }
+            }
+
             return false;
+        }
+
+        static internal bool IsFamilyOrAssemblyMethodAttributes(MethodAttributes attributes)
+        {
+            return (attributes & MethodAttributes.MemberAccessMask) == MethodAttributes.FamORAssem;
         }
     }
 }

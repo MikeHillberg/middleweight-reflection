@@ -22,7 +22,12 @@ namespace MiddleweightReflection
             {
                 if (string.IsNullOrEmpty(_name) && Reader != null)
                 {
-                    _name = Reader.GetString(Reader.GetAssemblyDefinition().Name);
+                    try
+                    {
+                        _name = Reader.GetString(Reader.GetAssemblyDefinition().Name);
+                    }
+                    // Ignore bad metadata that doesn't have a valid assembly name
+                    catch { }
                 }
                 return _name;
             }
@@ -188,8 +193,13 @@ namespace MiddleweightReflection
             var builder = ImmutableArray.CreateBuilder<AssemblyName>();
             foreach (var handle in Reader.AssemblyReferences)
             {
-                var reference = Reader.GetAssemblyReference(handle);
-                builder.Add(reference.GetAssemblyName());
+                try
+                {
+                    var reference = Reader.GetAssemblyReference(handle);
+                    builder.Add(reference.GetAssemblyName());
+                }
+                // Skip malformed references
+                catch { }
             }
             return builder.ToImmutable();
         }
@@ -234,7 +244,14 @@ namespace MiddleweightReflection
             var customAttributes = new List<MrCustomAttribute>(assemblyAttributeHandles.Count);
             foreach (var handle in assemblyAttributeHandles)
             {
-                customAttributes.Add(new MrCustomAttribute(handle, null, this));
+                try
+                {
+                    customAttributes.Add(new MrCustomAttribute(handle, null, this));
+                }
+                // Skip attributes that can't be decoded
+                catch
+                { 
+                }
             }
             return customAttributes.ToImmutableArray();
         }
