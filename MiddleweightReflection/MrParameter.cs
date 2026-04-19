@@ -108,5 +108,86 @@ namespace MiddleweightReflection
         }
 
         public ParameterAttributes Attributes => _parameter.Attributes;
+
+        /// <summary>
+        /// Returns true if this parameter has a default value.
+        /// </summary>
+        public bool HasDefaultValue
+        {
+            get
+            {
+                return _parameter.Attributes.HasFlag(ParameterAttributes.HasDefault)
+                    && !_parameter.GetDefaultValue().IsNil;
+            }
+        }
+
+        /// <summary>
+        /// Gets the default value of this parameter, or null if none.
+        /// Returns the value as a boxed object (int, string, bool, etc.).
+        /// </summary>
+        public object GetDefaultValue()
+        {
+            var constantHandle = _parameter.GetDefaultValue();
+            if (constantHandle.IsNil)
+            {
+                return null;
+            }
+
+            var reader = Method.DeclaringType.Assembly.Reader;
+            var constant = reader.GetConstant(constantHandle);
+            var blobReader = reader.GetBlobReader(constant.Value);
+
+            switch (constant.TypeCode)
+            {
+                case ConstantTypeCode.Boolean:
+                    return blobReader.ReadBoolean();
+                case ConstantTypeCode.Char:
+                    return blobReader.ReadChar();
+                case ConstantTypeCode.SByte:
+                    return blobReader.ReadSByte();
+                case ConstantTypeCode.Byte:
+                    return blobReader.ReadByte();
+                case ConstantTypeCode.Int16:
+                    return blobReader.ReadInt16();
+                case ConstantTypeCode.UInt16:
+                    return blobReader.ReadUInt16();
+                case ConstantTypeCode.Int32:
+                    return blobReader.ReadInt32();
+                case ConstantTypeCode.UInt32:
+                    return blobReader.ReadUInt32();
+                case ConstantTypeCode.Int64:
+                    return blobReader.ReadInt64();
+                case ConstantTypeCode.UInt64:
+                    return blobReader.ReadUInt64();
+                case ConstantTypeCode.Single:
+                    return blobReader.ReadSingle();
+                case ConstantTypeCode.Double:
+                    return blobReader.ReadDouble();
+                case ConstantTypeCode.String:
+                    return blobReader.ReadUTF16(blobReader.Length);
+                case ConstantTypeCode.NullReference:
+                    return null;
+                default:
+                    return null;
+            }
+        }
+
+        /// <summary>
+        /// Gets the ConstantTypeCode for the default value, or Invalid if no default.
+        /// </summary>
+        public ConstantTypeCode DefaultValueTypeCode
+        {
+            get
+            {
+                var constantHandle = _parameter.GetDefaultValue();
+                if (constantHandle.IsNil)
+                {
+                    return ConstantTypeCode.Invalid;
+                }
+
+                var reader = Method.DeclaringType.Assembly.Reader;
+                return reader.GetConstant(constantHandle).TypeCode;
+            }
+        }
     }
 }

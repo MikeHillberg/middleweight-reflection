@@ -52,6 +52,11 @@ namespace UnitTestSampleAssembly
         public unsafe delegate*<int, string, float> FunctionPointerProperty { get; }
         public unsafe delegate* unmanaged[Cdecl]<int, string, float> FunctionPointerProperty2 { get; }
 
+        // Two function pointers with same calling convention and arity but different parameter types
+        // Used to test MrType.Equals for function pointer types
+        public unsafe delegate*<int, double, float> FunctionPointerProperty3 { get; }
+        public unsafe delegate*<int, long, float> FunctionPointerProperty4 { get; }
+
         protected Class1<T1, string, T3> _class1Field;
 
         public void ModifiedTypes1(out string p1, ref string p2, string[] p3, out string[] p4)
@@ -64,6 +69,10 @@ namespace UnitTestSampleAssembly
         {
             p1 = null;
             p4 = null;
+        }
+
+        public void DefaultParameters(int i = 42, string s = null)
+        { 
         }
     }
 

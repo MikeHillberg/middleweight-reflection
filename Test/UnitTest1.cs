@@ -132,7 +132,7 @@ namespace MRUnitTests
             var builder = new StringBuilder();
             var typesString = WriteTypes(testAssembly);
 
-            Assert.AreEqual(expectedOutput, typesString);
+            Assert.AreEqual(expectedOutput, typesString); 
         }
 
 
@@ -463,6 +463,12 @@ namespace MRUnitTests
                 }
 
                 result.Append($"{parameterType.GetPrettyFullName()} {parameter.GetParameterName()}");
+
+                if(parameter.HasDefaultValue)
+                {
+                    var defaultValue = parameter.GetDefaultValue();
+                    result.Append($" = {defaultValue ?? "null"}");
+                }
 
                 if(isArray)
                 {

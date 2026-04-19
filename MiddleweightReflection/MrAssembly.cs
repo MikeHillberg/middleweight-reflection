@@ -181,6 +181,48 @@ namespace MiddleweightReflection
         }
 
         /// <summary>
+        /// Gets the Module Version ID (MVID), a GUID that uniquely identifies this build of the module.
+        /// </summary>
+        public Guid Mvid
+        {
+            get
+            {
+                if (IsFakeAssembly || Reader == null)
+                {
+                    return Guid.Empty;
+                }
+
+                try
+                {
+                    var moduleDef = Reader.GetModuleDefinition();
+                    return Reader.GetGuid(moduleDef.Mvid);
+                }
+                catch { return Guid.Empty; }
+            }
+        }
+
+        /// <summary>
+        /// Gets the module name (typically the filename of the assembly).
+        /// </summary>
+        public string ModuleName
+        {
+            get
+            {
+                if (IsFakeAssembly || Reader == null)
+                {
+                    return null;
+                }
+
+                try
+                {
+                    var moduleDef = Reader.GetModuleDefinition();
+                    return Reader.GetString(moduleDef.Name);
+                }
+                catch { return null; }
+            }
+        }
+
+        /// <summary>
         /// Gets the assemblies referenced by this assembly.
         /// </summary>
         public ImmutableArray<AssemblyName> GetReferencedAssemblies()
@@ -250,7 +292,7 @@ namespace MiddleweightReflection
                 }
                 // Skip attributes that can't be decoded
                 catch
-                { 
+                {
                 }
             }
             return customAttributes.ToImmutableArray();

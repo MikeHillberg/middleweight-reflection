@@ -176,6 +176,7 @@ namespace MiddleweightReflection
                 this.Assembly == other.Assembly
                 && this.TypeCode == other.TypeCode
                 && this.IsArray == other.IsArray
+                && this.ArrayRank == other.ArrayRank
                 && this.IsReference == other.IsReference
                 && this.IsPointer == other.IsPointer
                 && this.IsConst == other.IsConst
@@ -213,7 +214,7 @@ namespace MiddleweightReflection
 
                 for(int i = 0; i < parmTypes1.Length; i++)
                 {
-                    if (parmTypes1[i] != parmTypes1[i])
+                    if (parmTypes1[i] != parmTypes2[i])
                     {
                         return false;
                     }    
@@ -296,6 +297,7 @@ namespace MiddleweightReflection
         {
             var code = TypeDefinitionHandle.GetHashCode();
             code += TypeCode.GetHashCode();
+
             if (_fakeName != null)
             {
                 code += _fakeName.GetHashCode();
@@ -304,6 +306,32 @@ namespace MiddleweightReflection
             if (this.GenericParameterHandle != null)
             {
                 code += GenericParameterHandle.GetHashCode();
+            }
+
+            // Include array/pointer/reference modifiers
+            // Use different primes to avoid hash collisions between e.g. int[] and int*
+            if (IsArray) code = code * 31 + ArrayRank;
+            if (IsPointer) code = code * 37 + 1;
+            if (IsReference) code = code * 41 + 1;
+
+            // Include type arguments for closed generic types
+            if (_typeArguments != null)
+            {
+                foreach (var arg in _typeArguments)
+                {
+                    code = code * 31 + (arg?.GetHashCode() ?? 0);
+                }
+            }
+
+            // Include function pointer signature
+            if (IsFunctionPointer && _functionPointerSignature.ParameterTypes.Length > 0)
+            {
+                code = code * 31 + _functionPointerSignature.Header.GetHashCode();
+                code = code * 31 + (_functionPointerSignature.ReturnType?.GetHashCode() ?? 0);
+                foreach (var pt in _functionPointerSignature.ParameterTypes)
+                {
+                    code = code * 31 + (pt?.GetHashCode() ?? 0);
+                }
             }
 
             return code;
@@ -507,11 +535,24 @@ namespace MiddleweightReflection
             }
 
             // Convert the constraint handles into types 
+            // We need the declaring type's TypeDefinition for resolving TypeSpecification constraints.
+            // The generic parameter's Parent gives us the declaring type/method.
+            TypeDefinition parentTypeDefinition = default;
+            if (genericParameter.Parent.Kind == HandleKind.TypeDefinition)
+            {
+                parentTypeDefinition = this.Assembly.Reader.GetTypeDefinition((TypeDefinitionHandle)genericParameter.Parent);
+            }
+            else if (genericParameter.Parent.Kind == HandleKind.MethodDefinition)
+            {
+                var methodDef = this.Assembly.Reader.GetMethodDefinition((MethodDefinitionHandle)genericParameter.Parent);
+                parentTypeDefinition = this.Assembly.Reader.GetTypeDefinition(methodDef.GetDeclaringType());
+            }
+
             var constraintList = new List<MrType>(count);
             foreach (var genericConstraintHandle in genericConstraintHandles)
             {
                 var genericConstraint = this.Assembly.Reader.GetGenericParameterConstraint(genericConstraintHandle);
-                constraintList.Add(this.Assembly.GetTypeFromEntityHandle(genericConstraint.Type, this.TypeDefinition));
+                constraintList.Add(this.Assembly.GetTypeFromEntityHandle(genericConstraint.Type, parentTypeDefinition));
             }
             constraints = constraintList.ToImmutableArray(); // [out] parameter
 
